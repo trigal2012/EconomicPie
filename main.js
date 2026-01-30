@@ -137,6 +137,9 @@ function displayScoreOverlay(correct, score = 100) {
 }
 
 function displayEClassOverlay(eClass){
+    if (economicClasses[eClass]['guessedSlices'].length === 0) {
+        return;
+    }
     var layerName = '#slice-zone';
     
     // Clone Template
@@ -271,10 +274,12 @@ function updatePlateVisuals() {
         $('#eClass-label-' + i).html('$' + ec.guessedValue + ' trillion');
 
         // Update Plate Image
-        var $img = $('.droppable[eClass="' + i + '"] img');
+        var $droppable = $('.droppable[eClass="' + i + '"]');
+        var $img = $droppable.find('img');
         var val = ec.guessedValue;
         
         if (val > 0) {
+            $droppable.addClass('has-slices');
             var imageValue = val;
             if (val !== 95 && val % 10 !== 0) {
                 imageValue = Math.round(val / 10) * 10;
@@ -282,6 +287,7 @@ function updatePlateVisuals() {
             }
             $img.attr('src', 'images/Pies/pie-' + imageValue + '.png').css('opacity', 1);
         } else {
+            $droppable.removeClass('has-slices');
             $img.css('opacity', 0);
         }
     });
