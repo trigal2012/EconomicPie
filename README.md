@@ -8,6 +8,23 @@ The game presents players with a virtual pie representing $100 trillion of priva
 
 Players drag and drop pie slices, each representing a certain trillion-dollar value, onto the plates corresponding to the economic classes. Once all the "wealth" has been distributed, players can submit their guess to see how it compares to the actual distribution of wealth. The game provides a score based on the accuracy of the guess and encourages players to learn more about wealth inequality.
 
+## Game Features & User Actions
+
+This application supports the following interactions:
+
+*   **Distribute Wealth:** Drag pie slices (representing $5T or $10T) onto the plates of different economic classes.
+*   **Modify Distribution:** Click or tap on a plate to remove the last added slice if you want to change your guess.
+*   **Real-time Tracking:** The game tracks the remaining wealth to be distributed in real-time.
+*   **Validation:** Users must distribute exactly $100 Trillion before the game calculates the score.
+*   **Scoring System:**
+    *   **Correct Guess:** If the distribution matches reality, a "Congrats" screen appears.
+    *   **Incorrect Guess:** A score is calculated based on the deviation from the actual values.
+*   **Post-Game Options:**
+    *   **Show Answer:** Reveals the true wealth distribution in the US.
+    *   **Share:** Allows users to share the game via native sharing (mobile) or clipboard copy (desktop).
+    *   **Learn More:** Directs users to external resources to learn about inequality.
+    *   **Play Again:** Resets the board to play from the beginning.
+
 ## How to Run Locally
 
 To run this project on your local machine, you don't need any complex build steps. You just need a modern web browser.
