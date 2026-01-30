@@ -104,6 +104,18 @@
 {
 	aspect-ratio: 1 / 1;
 	width: -webkit-fill-available;
+	background-image: url('images/Plate.png');
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.droppable img
+{
+	height: 75%;
+	width: 75%;
 }
  @media (min-width: 1024px) {
 .droppable
