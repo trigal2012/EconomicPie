@@ -18,7 +18,7 @@
 	padding-top: .75rem;
 	width: 100%;
 }
-#overlay-card
+.overlay-card
 {
 	border-radius: 2rem;
 	box-shadow: 1rem;
@@ -114,6 +114,7 @@
 	border: none;
 	background-color: transparent;
 	padding: 0;
+	margin-top: auto;
 }
 .droppable img
 {
@@ -176,5 +177,10 @@ p
 	.small-text {
 		font-size: 0.85rem;
 		line-height: 1.2;
+	}
+	.label-text {
+		width: min-content;
+		margin-left: auto;
+		margin-right: auto;
 	}
 }
