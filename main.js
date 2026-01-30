@@ -151,9 +151,15 @@ function displayScoreOverlay(correct, score = 100) {
     <div id="overlay-card" class="card">
         
         <div class="card-header">
-            <div class="row">
-                <div class="col-12 text-center">
+            <div class="row align-items-center">
+                <div class="col-1"></div>
+                <div class="col-10 text-center">
                     <h2>${cardHeader}</h2>
+                </div>
+                <div class="col-1">
+                    <button type="button" class="close" aria-label="Close" onClick="closeOverlay('${layerName}')">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -164,11 +170,6 @@ function displayScoreOverlay(correct, score = 100) {
                 <div class="col-12 text-center">
                     <button type="button" class="btn btn-primary mr-2" onClick="shareGame('` + layerName + `')">Share</button>
                     <button type="button" class="btn btn-primary ml-2" onClick="window.open('https://inequality.org/facts/income-inequality/', '_blank')">Learn More</button>
-                </div>
-            </div>
-            <div class="row justify-content-center mt-3">
-                <div class="col-12 text-center">
-                    <button type="button" class="btn btn-secondary" onClick="closeOverlay('` + layerName + `')">Close</button>
                 </div>
             </div>
         </div>
@@ -398,7 +399,8 @@ function removeSliceFromEClass(sliceInex, eClass){
 interact('.droppable').dropzone({
     // only accept elements matching this CSS selector
     accept: '.slice',
-    // Require a 75% element overlap for a drop to be possible
+    // Require pointer overlap for a drop to be possible
+    overlap: 'pointer',
 
 
     // When slice is droped on square
@@ -438,9 +440,12 @@ interact('.draggable')
             //
             // call this function on every dragend event
             end(event) {
-                var x = Number(event.target.x) + Number(event.target.getAttribute('data-x'));
-                var y = Number(event.target.y) + Number(event.target.getAttribute('data-y'));
-
+                if (!event.relatedTarget) {
+                    var target = event.target;
+                    target.style.transform = 'translate(0px, 0px)';
+                    target.setAttribute('data-x', 0);
+                    target.setAttribute('data-y', 0);
+                }
             }
         }
     })

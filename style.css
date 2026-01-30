@@ -7,14 +7,14 @@
 }
 #gameContainer
 {
-	height: 100vh;
+	min-height: 100vh;
 	margin-top: 2rem;
 	padding: 0;
 	position: relative;
 }
 #game-layer
 {
-	height: 100vh;
+	min-height: 100vh;
 	padding-top: .75rem;
 	width: 100%;
 }
@@ -124,6 +124,22 @@
 	height: 20vh;
 	cursor: pointer;
 }
+}
+@media (max-width: 768px) {
+	.draggable {
+		width: 25vw;
+		height: 25vw;
+	}
+	h1 {
+		font-size: 1.75rem;
+	}
+	p {
+		font-size: 0.9rem;
+	}
+	.small-text {
+		font-size: 0.7rem;
+		line-height: 1.2;
+	}
 }
 .slice-placeholder-div
 {
