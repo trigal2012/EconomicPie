@@ -56,7 +56,7 @@ That's it! The game should now be running in your browser.
 
 You can play the live version of the game here:
 
-**[Link to live game]** - (https://your-live-url.com)
+**[Link to live game]** - (https://economicpie.online)
 
 ## Project Details
 
@@ -100,9 +100,8 @@ This is an open-source project. You are free to use, modify, and distribute it a
 
 ## Contact & Support
 
-*   **Project Maintainer:** [Your Name/Organization]
+*   **Project Maintainer:** [Organization Name]
 *   **Contact Email:** [your-email@example.com]
-*   **Project Link:** [Link to the repository]
 
 If you have any questions or encounter any issues, please open an issue on the GitHub repository.
 
