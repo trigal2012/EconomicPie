@@ -95,7 +95,6 @@
 .draggable
 {
 	height: 20vh;
-	ms-touch-action: none;
 	position: relative;
 	touch-action: none;
 	width: 20vh;
@@ -128,22 +127,6 @@
 	height: 20vh;
 	cursor: pointer;
 }
-}
-@media (max-width: 768px) {
-	.draggable {
-		width: 25vw;
-		height: 25vw;
-	}
-	h1 {
-		font-size: 1.75rem;
-	}
-	p {
-		font-size: 0.9rem;
-	}
-	.small-text {
-		font-size: 0.7rem;
-		line-height: 1.2;
-	}
 }
 .slice-placeholder-div
 {
@@ -178,4 +161,20 @@ img
 p
 {
 	font-size: 18px;
+}
+@media (max-width: 1024px) {
+	.draggable {
+		width: 25vw;
+		height: 25vw;
+	}
+	h1 {
+		font-size: 2.5rem;
+	}
+	p {
+		font-size: 1.1rem;
+	}
+	.small-text {
+		font-size: 0.85rem;
+		line-height: 1.2;
+	}
 }
