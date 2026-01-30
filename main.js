@@ -316,6 +316,11 @@ function updateSlice() {
         
         for (var i = 0; i < economicClasses.length; i++){
             document.getElementById('eClass-label-' + i).innerHTML = '$' + economicClasses[i].guessedValue + ' trillion';
+            
+            // Update plate image to show the top slice or empty plate
+            var slices = economicClasses[i].guessedSlices;
+            var imgPath = (slices.length > 0) ? slices[slices.length - 1].img : 'images/Plate.png';
+            $('.droppable[eClass="' + i + '"] img').attr('src', imgPath);
         }
         
     }else{

@@ -12,6 +12,16 @@
 	padding: 0;
 	position: relative;
 }
+@media (min-width: 768px) {
+    .container {
+        max-width: 95%;
+    }
+}
+@media (min-width: 576px) {
+    .container {
+        max-width: 100%;
+    }
+}
 #game-layer
 {
 	height: 100vh;
@@ -103,7 +113,7 @@
 .droppable
 {
 	aspect-ratio: 1 / 1;
-	width: -webkit-fill-available;
+	width: -webkit-fill-available !important;
 }
  @media (min-width: 1024px) {
 .droppable
@@ -145,5 +155,5 @@ img
 }
 p
 {
-	font-size: 18px;
+	font-size: 1rem;
 }
