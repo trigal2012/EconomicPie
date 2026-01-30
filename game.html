@@ -8,29 +8,6 @@
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" version=1 href="style.css">
     <link rel="icon" href="images/Pies/pie-100.png" type="image/png" />
-    <link rel="preload" as="image" href="images/Plate.png">
-    <link rel="preload" as="image" href="images/Pies/pie-10.png">
-    <link rel="preload" as="image" href="images/Pies/pie-100.png">
-    <link rel="preload" as="image" href="images/Pies/pie-20.png">
-    <link rel="preload" as="image" href="images/Pies/pie-30.png">
-    <link rel="preload" as="image" href="images/Pies/pie-40.png">
-    <link rel="preload" as="image" href="images/Pies/pie-50.png">
-    <link rel="preload" as="image" href="images/Pies/pie-60.png">
-    <link rel="preload" as="image" href="images/Pies/pie-70.png">
-    <link rel="preload" as="image" href="images/Pies/pie-80.png">
-    <link rel="preload" as="image" href="images/Pies/pie-90.png">
-    <link rel="preload" as="image" href="images/Pies/pie-95.png">
-    <link rel="preload" as="image" href="images/slices/slice-1.png">
-    <link rel="preload" as="image" href="images/slices/slice-2.png">
-    <link rel="preload" as="image" href="images/slices/slice-3.png">
-    <link rel="preload" as="image" href="images/slices/slice-4.png">
-    <link rel="preload" as="image" href="images/slices/slice-5.png">
-    <link rel="preload" as="image" href="images/slices/slice-6.png">
-    <link rel="preload" as="image" href="images/slices/slice-7.png">
-    <link rel="preload" as="image" href="images/slices/slice-8.png">
-    <link rel="preload" as="image" href="images/slices/slice-9.png">
-    <link rel="preload" as="image" href="images/slices/slice-10.png">
-    <link rel="preload" as="image" href="images/slices/slice-11.png">
     <link rel="icon" type="image/x-icon" href="./pie-icon.png">
     <script src="https://unpkg.com/interactjs/dist/interact.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
@@ -54,7 +31,7 @@
                     <p>If you want to change a guess, tap a plate</p>
                     <hr>
                     </div>
-                    <div class="col-12 text-center"><img id="pie-image" src="images/Pies/pie-100.png"></div>
+                    <div class="col-12 text-center"><img id="pie-image" src="images/Pies/pie-100.png" alt="full pie"></div>
                     <div class="col-12 text-center"><p id="slice-value">$5 Trillion</p></div>
                 </div>
             
@@ -62,7 +39,7 @@
                 <div class="col-10 text-center justify-content-center slice-placeholder-div">
                     <!--Slice Icon-->
                     <div class="slice draggable" id="slice-placeholder" slice-id="1" slice-value="1">
-                        <img src="slice 1.png" id="slice-image">
+                        <img src="slice 1.png" id="slice-image" alt="$5 Trillion pie slice">
                     </div>
                 </div>
             </div>
@@ -77,27 +54,27 @@
             <div class="row py-2 justify-content-center">
                 <div class="col text-center px-1">
                     
-                    <div class="droppable" eClass=0 onClick="displayEClassOverlay(0)"><img src="images/Plate.png"></div>
+                    <button type="button" class="droppable" eClass=0 onClick="displayEClassOverlay(0)"><img src="images/Plate.png" alt="poorest % plate"></button>
                     <p id="eClass-label-0">0</p>
                 </div>
                 <div class="col text-center px-1">
                     
-                    <div class="droppable" eClass=1 onClick="displayEClassOverlay(1)"><img src="images/Plate.png"></div>
+                    <button type="button" class="droppable" eClass=1 onClick="displayEClassOverlay(1)"><img src="images/Plate.png" alt="lower middle % plate"></button>
                     <p id="eClass-label-1">0</p>
                 </div>
                 <div class="col text-center px-1">
                     
-                    <div class="droppable" eClass=2 onClick="displayEClassOverlay(2)"><img src="images/Plate.png"></div>
+                    <button type="button" class="droppable" eClass=2 onClick="displayEClassOverlay(2)"><img src="images/Plate.png" alt="middle % plate"></button>
                     <p id="eClass-label-2">0</p>
                 </div>
                 <div class="col text-center px-1">
                     
-                    <div class="droppable" eClass=3 onClick="displayEClassOverlay(3)"><img src="images/Plate.png"></div>
+                    <button type="button" class="droppable" eClass=3 onClick="displayEClassOverlay(3)"><img src="images/Plate.png" alt="upper middle % plate"></button>
                     <p id="eClass-label-3">0</p>
                 </div>
                 <div class="col text-center px-1">
                     
-                    <div class="droppable" eClass=4 onClick="displayEClassOverlay(4)"><img src="images/Plate.png"></div>
+                    <button type="button" class="droppable" eClass=4 onClick="displayEClassOverlay(4)"><img src="images/Plate.png" alt="richest % plate"></button>
                     <p id="eClass-label-4">0</p>
                 </div>
             </div>

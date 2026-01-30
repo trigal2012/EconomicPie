@@ -99,6 +99,7 @@
 	position: relative;
 	touch-action: none;
 	width: 20vh;
+	z-index: 100;
 }
 .droppable
 {
@@ -111,6 +112,9 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	border: none;
+	background-color: transparent;
+	padding: 0;
 }
 .droppable img
 {

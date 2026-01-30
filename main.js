@@ -257,8 +257,10 @@ function displayEClassOverlay(eClass){
             html += '</div><div class="row justify-content-center align-items-center mt-2">';
         }
         html += `
-            <div class="col-3 text-center" onClick="removeSliceFromEClass(${i},${eClass})" style="cursor: pointer;">
-                <img src="${arr[i]['img']}" style="max-height: 100px; width: auto;">
+            <div class="col-3 text-center">
+                <button type="button" onClick="removeSliceFromEClass(${i},${eClass})" style="cursor: pointer; background: transparent; border: none; padding: 0;">
+                    <img src="${arr[i]['img']}" style="max-height: 100px; width: auto;">
+                </button>
             </div>`;
     }
     
