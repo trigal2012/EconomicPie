@@ -88,7 +88,7 @@ function displayScoreOverlay(correct, score = 100) {
         cardHeader = 'Congrats!'
 
         // Prepare the background board: Hide slice and show controls
-        $('#slice-placeholder').hide();
+        $('#stacks-container').hide();
         if ($('#post-game-controls').length === 0) {
             var controlsTemplate = document.getElementById('template-post-game-controls').content.cloneNode(true);
             $('.slice-placeholder-div').append(controlsTemplate);
@@ -165,8 +165,8 @@ function displayEClassOverlay(eClass){
 }
 
 function checkGuess() {
-    const sumOfGuesses = economicClasses.reduce((sum, economicClasses) => {
-        return sum + parseInt(economicClasses.guessedValue);
+    const sumOfGuesses = economicClasses.reduce((sum, ec) => {
+        return sum + ec.guessedValue;
     }, 0);
     if (sumOfGuesses != 100) {
         alert('Use all the wealth remaining ($' + (100 - sumOfGuesses) + ' trillion) before submitting your guess');
@@ -196,9 +196,7 @@ function checkGuess() {
 
 function updateSlice() {
     // 1. Reset visibility state (hide draggable elements initially)
-    $('#slice-value').css('visibility', 'hidden');
     $('#pie-image').css('visibility', 'hidden');
-    $('#slice-placeholder').css('visibility', 'hidden');
 
     // 2. Calculate State
     const sumOfGuesses = calculateSumOfGuesses();
@@ -210,7 +208,7 @@ function updateSlice() {
     // 4. Check Game Flow
     if (availablePieces.length > 0) {
         // Game continues: Show and update draggable slice
-        updateDraggableSlice();
+        updateStacks();
         
         // Show main pie (it represents remaining wealth)
         $('#pie-image').css('visibility', 'visible');
@@ -220,12 +218,13 @@ function updateSlice() {
 
     } else {
         // Game Over: Check results
+        $('#stacks-container').css('visibility', 'hidden');
         checkGuess();
     }
 }
 
 function calculateSumOfGuesses() {
-    return economicClasses.reduce((sum, ec) => sum + parseInt(ec.guessedValue), 0);
+    return economicClasses.reduce((sum, ec) => sum + ec.guessedValue, 0);
 }
 
 function updateRemainingWealthUI(sumOfGuesses) {
@@ -243,31 +242,35 @@ function updateMainPieImage(sumOfGuesses) {
         if (remaining !== 95 && remaining % 10 !== 0) {
             imageValue = Math.round(remaining / 10) * 10;
         }
+        // Ensure visual feedback when dropping the first 2.5T slice (97.5 -> 95 instead of rounding back to 100)
+        if (imageValue === 100 && remaining < 100) {
+            imageValue = 95;
+        }
         $('#pie-image').attr('src', 'images/Pies/pie-' + imageValue + '.png');
     }
 }
 
-function updateDraggableSlice() {
-    var currentPiece = availablePieces[0];
-    var $sliceVal = $('#slice-value');
-    var $slicePlaceholder = $('#slice-placeholder');
-    var $sliceImage = $('#slice-image');
+function updateStacks() {
+    $('#stacks-container').css('visibility', 'visible');
+    
+    const stacks = [
+        { id: '#stack-2-5', val: 2.5 },
+        { id: '#stack-5', val: 5 },
+        { id: '#stack-10', val: 10 }
+    ];
 
-    // Update Text
-    $sliceVal.html("$" + currentPiece.value + " trillion").css('visibility', 'visible');
-
-    // Update Image
-    $sliceImage.attr('src', currentPiece.img);
-
-    // Update Attributes & Position
-    $slicePlaceholder.css({
-        'visibility': 'visible',
-        'transform': 'none'
-    }).attr({
-        'data-x': 0,
-        'data-y': 0,
-        'slice-id': currentPiece.id,
-        'slice-value': currentPiece.value
+    stacks.forEach(stack => {
+        const hasPiece = availablePieces.some(p => p.value == stack.val);
+        const $el = $(stack.id);
+        
+        if (hasPiece) {
+            $el.parent().css('visibility', 'visible');
+            $el.css('transform', 'translate(0px, 0px)');
+            $el.attr('data-x', 0);
+            $el.attr('data-y', 0);
+        } else {
+            $el.parent().css('visibility', 'hidden');
+        }
     });
 }
 
@@ -289,9 +292,11 @@ function updatePlateVisuals() {
                 if (imageValue === 0) imageValue = 10;
             }
             $img.attr('src', 'images/Pies/pie-' + imageValue + '.png').css('opacity', 1);
+            $img.css({ '-webkit-mask-image': 'none', 'mask-image': 'none' });
         } else {
             $droppable.removeClass('has-slices');
             $img.css('opacity', 0);
+            $img.css({ '-webkit-mask-image': 'none', 'mask-image': 'none' });
         }
     });
 }
@@ -323,12 +328,21 @@ interact('.droppable').dropzone({
         var currentClass = event.target.getAttribute('eClass');
 
         // Get slice dropped
-        var dropped_slice = availablePieces.shift();
+        var draggableElement = event.relatedTarget;
+        var val = parseFloat(draggableElement.getAttribute('data-value'));
+        var index = availablePieces.findIndex(p => p.value == val);
+        
+        if (index > -1) {
+             var dropped_slice = availablePieces.splice(index, 1)[0];
 
-        // Add slice to guessedSlices of respective class
-        addSliceToEClass(currentClass, dropped_slice);
+             // Reset the draggable element position immediately
+             draggableElement.style.transform = 'translate(0px, 0px)';
+             draggableElement.setAttribute('data-x', 0);
+             draggableElement.setAttribute('data-y', 0);
 
-        updateSlice();
+             addSliceToEClass(currentClass, dropped_slice);
+             updateSlice();
+        }
 
 
     },
@@ -347,14 +361,16 @@ interact('.draggable')
 
             start(event) {
                 var target = event.target;
+                target.style.zIndex = '1000';
                 sessionStorage.setItem('piece_id', target.getAttribute('id'));
                 sessionStorage.setItem('sliceID', event.target.getAttribute('id'));
             },
             //
             // call this function on every dragend event
             end(event) {
+                var target = event.target;
+                target.style.zIndex = '';
                 if (!event.relatedTarget) {
-                    var target = event.target;
                     target.style.transform = 'translate(0px, 0px)';
                     target.setAttribute('data-x', 0);
                     target.setAttribute('data-y', 0);
@@ -380,9 +396,8 @@ function showAnswer() {
     closeOverlay('#score-overlay');
     
     // Hide game controls
-    $('#slice-placeholder').hide();
+    $('#stacks-container').hide();
     $('#pie-image').css('visibility', 'hidden');
-    $('#slice-value').css('visibility', 'hidden');
     $('#remaining-container').html('Actual Wealth Distribution');
 
     for (var i = 0; i < economicClasses.length; i++) {
@@ -400,11 +415,12 @@ function showAnswer() {
                 if (imageValue === 0) imageValue = 10;
             }
             $img.attr('src', 'images/Pies/pie-' + imageValue + '.png').css('opacity', 1);
+            $img.css({ '-webkit-mask-image': 'none', 'mask-image': 'none' });
         } else {
             $img.css('opacity', 0);
+            $img.css({ '-webkit-mask-image': 'none', 'mask-image': 'none' });
         }
     }
-    
     // Disable interactions
     $('.droppable').css('pointer-events', 'none');
 
@@ -433,7 +449,7 @@ function resetGame() {
 
     // 3. Re-enable interactions and update UI
     $('.droppable').css('pointer-events', 'auto');
-    $('#slice-placeholder').show();
+    $('#stacks-container').show();
     closeOverlay('#score-overlay');
     updateSlice();
 }
