@@ -95,10 +95,14 @@
 .draggable
 {
 	height: 20vh;
+	ms-touch-action: none;
 	position: relative;
 	touch-action: none;
 	width: 20vh;
-	z-index: 100;
+	cursor: grab;
+}
+.draggable:active {
+	cursor: grabbing;
 }
 .droppable
 {
@@ -119,6 +123,10 @@
 }
 .droppable.has-slices {
 	cursor: pointer;
+	cursor: default;
+}
+.droppable.has-slices {
+	cursor: pointer;
 }
 .droppable img
 {
@@ -131,6 +139,22 @@
     aspect-ratio: 1 / 1;
 	height: 20vh;
 }
+}
+@media (max-width: 768px) {
+	.draggable {
+		width: 25vw;
+		height: 25vw;
+	}
+	h1 {
+		font-size: 1.75rem;
+	}
+	p {
+		font-size: 0.9rem;
+	}
+	.small-text {
+		font-size: 0.7rem;
+		line-height: 1.2;
+	}
 }
 .slice-placeholder-div
 {

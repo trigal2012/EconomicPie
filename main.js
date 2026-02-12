@@ -140,6 +140,9 @@ function displayEClassOverlay(eClass){
     if (economicClasses[eClass]['guessedSlices'].length === 0) {
         return;
     }
+    if (economicClasses[eClass]['guessedSlices'].length === 0) {
+        return;
+    }
     var layerName = '#slice-zone';
     
     // Clone Template

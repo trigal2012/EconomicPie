@@ -120,7 +120,9 @@
 {
     aspect-ratio: 1 / 1;
 	height: 20vh;
-	cursor: pointer;
+}
+.droppable.has-slices {
+    cursor: pointer;
 }
 }
 .slice-placeholder-div
