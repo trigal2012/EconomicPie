@@ -31,14 +31,29 @@
                     <hr>
                     </div>
                     <div class="col-12 text-center"><img id="pie-image" src="images/Pies/pie-100.png" alt="full pie"></div>
-                    <div class="col-12 text-center"><p id="slice-value">$5 Trillion</p></div>
                 </div>
             
-            <div class="row justify-content-center">
-                <div class="col-10 text-center justify-content-center slice-placeholder-div">
-                    <!--Slice Icon-->
-                    <div class="slice draggable" id="slice-placeholder" slice-id="1" slice-value="1">
-                        <img src="images/slices/slice-1.png" id="slice-image" alt="$5 Trillion pie slice">
+            <div class="row justify-content-center stacks-row">
+                <div class="col-12 text-center justify-content-center slice-placeholder-div">
+                    <div class="row justify-content-center" id="stacks-container">
+                        <div class="col-4 text-center">
+                            <div class="slice draggable" id="stack-2-5" data-value="2.5">
+                                <img src="images/slices/slice-12.png" alt="$2.5 Trillion slice">
+                            </div>
+                            <p class="mt-2 font-weight-bold stack-label">$2.5 Trillion</p>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="slice draggable" id="stack-5" data-value="5">
+                                <img src="images/slices/slice-1.png" alt="$5 Trillion slice">
+                            </div>
+                            <p class="mt-2 font-weight-bold stack-label">$5 Trillion</p>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="slice draggable" id="stack-10" data-value="10">
+                                <img src="images/slices/slice-4.png" alt="$10 Trillion slice">
+                            </div>
+                            <p class="mt-2 font-weight-bold stack-label">$10 Trillion</p>
+                        </div>
                     </div>
                 </div>
             </div>

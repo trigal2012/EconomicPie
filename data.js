@@ -19,13 +19,13 @@ var economicClasses = [{
 }, {
     "label": "Upper Middle Class (60\u201180%)",
     "name": "upper_class",
-    "value": 5,
+    "value": 7.5,
     "guessedValue": 0,
     "guessedSlices": []
 }, {
     "label": "Richest 20%",
     "name": "upper_upper_class",
-    "value": 90,
+    "value": 97.5,
     "guessedValue": 0,
     "guessedSlices": []
 }];
@@ -33,56 +33,61 @@ var economicClasses = [{
 const INITIAL_PIECES = [
     {
         "id": 1,
+        "value": 2.5,
+        "img": "images/slices/slice-12.png"
+    },
+        {
+        "id": 2,
+        "value": 2.5,
+        "img": "images/slices/slice-13.png"
+    },
+    {
+        "id": 3,
         "value": 5,
         "img": "images/slices/slice-1.png"
     },
     {
-        "id": 2,
-        "value": 5,
-        "img": "images/slices/slice-2.png"
-    },
-    {
-        "id": 3,
+        "id": 4,
         "value": 10,
         "img": "images/slices/slice-3.png"
     },
     {
-        "id": 4,
+        "id": 5,
         "value": 10,
         "img": "images/slices/slice-4.png"
     },
     {
-        "id": 5,
+        "id": 6,
         "value": 10,
         "img": "images/slices/slice-5.png"
     },
     {
-        "id": 6,
+        "id": 7,
         "value": 10,
         "img": "images/slices/slice-6.png"
     },
     {
-        "id": 7,
+        "id": 8,
         "value": 10,
         "img": "images/slices/slice-7.png"
     },
     {
-        "id": 8,
+        "id": 9,
         "value": 10,
         "img": "images/slices/slice-8.png"
     },
     {
-        "id": 9,
+        "id": 10,
         "value": 10,
         "img": "images/slices/slice-9.png"
     },
     {
-        "id": 10,
+        "id": 11,
         "value": 10,
         "img": "images/slices/slice-10.png"
     },
     {
-        "id": 11,
+        "id": 12,
         "value": 10,
         "img": "images/slices/slice-11.png"
     }

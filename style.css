@@ -104,6 +104,10 @@
 .draggable:active {
 	cursor: grabbing;
 }
+.draggable img {
+	height: 100%;
+	width: auto;
+}
 .droppable
 {
 	aspect-ratio: 1 / 1;
@@ -130,8 +134,10 @@
 }
 .droppable img
 {
-	height: 75%;
-	width: 75%;
+	height: 60%;
+	width: 60%;
+	background-color: transparent;
+	pointer-events: none;
 }
  @media (min-width: 1024px) {
 .droppable
@@ -159,6 +165,15 @@
 .slice-placeholder-div
 {
 	display: flex;
+	height: auto;
+	overflow: visible;
+}
+.stacks-row {
+	margin-bottom: 5%;
+}
+.stack-label {
+	color: black;
+	pointer-events: none;
 }
 body
 {
