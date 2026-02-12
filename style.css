@@ -138,6 +138,8 @@
 	width: 60%;
 	background-color: transparent;
 	pointer-events: none;
+	border-radius: 50%;
+	mix-blend-mode: multiply;
 }
  @media (min-width: 1024px) {
 .droppable

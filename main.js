@@ -292,6 +292,7 @@ function updatePlateVisuals() {
                 if (imageValue === 0) imageValue = 10;
             }
             $img.attr('src', 'images/Pies/pie-' + imageValue + '.png').css('opacity', 1);
+            $img.css({ '-webkit-mask-image': 'none', 'mask-image': 'none' });
         } else {
             $droppable.removeClass('has-slices');
             $img.css('opacity', 0);
@@ -414,6 +415,7 @@ function showAnswer() {
                 if (imageValue === 0) imageValue = 10;
             }
             $img.attr('src', 'images/Pies/pie-' + imageValue + '.png').css('opacity', 1);
+            $img.css({ '-webkit-mask-image': 'none', 'mask-image': 'none' });
         } else {
             $img.css('opacity', 0);
             $img.css({ '-webkit-mask-image': 'none', 'mask-image': 'none' });
