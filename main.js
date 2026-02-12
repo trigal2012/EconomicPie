@@ -347,14 +347,16 @@ interact('.draggable')
 
             start(event) {
                 var target = event.target;
+                target.style.zIndex = '1000';
                 sessionStorage.setItem('piece_id', target.getAttribute('id'));
                 sessionStorage.setItem('sliceID', event.target.getAttribute('id'));
             },
             //
             // call this function on every dragend event
             end(event) {
+                var target = event.target;
+                target.style.zIndex = '';
                 if (!event.relatedTarget) {
-                    var target = event.target;
                     target.style.transform = 'translate(0px, 0px)';
                     target.setAttribute('data-x', 0);
                     target.setAttribute('data-y', 0);
