@@ -18,7 +18,7 @@
 	padding-top: .75rem;
 	width: 100%;
 }
-#overlay-card
+.overlay-card
 {
 	border-radius: 2rem;
 	box-shadow: 1rem;
@@ -118,6 +118,11 @@
 	border: none;
 	background-color: transparent;
 	padding: 0;
+	margin-top: auto;
+	cursor: default;
+}
+.droppable.has-slices {
+	cursor: pointer;
 	cursor: default;
 }
 .droppable.has-slices {
@@ -184,4 +189,25 @@ img
 p
 {
 	font-size: 18px;
+}
+@media (max-width: 1024px) {
+	.draggable {
+		width: 25vw;
+		height: 25vw;
+	}
+	h1 {
+		font-size: 2.5rem;
+	}
+	p {
+		font-size: 1.1rem;
+	}
+	.small-text {
+		font-size: 0.85rem;
+		line-height: 1.2;
+	}
+	.label-text {
+		width: min-content;
+		margin-left: auto;
+		margin-right: auto;
+	}
 }

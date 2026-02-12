@@ -1,97 +1,49 @@
-var economicClasses = [{
-    "label": "Lower Class",
-    "name": "lower_class",
-    "value": 0,
-    "guessedValue": 0,
-    "guessedSlices": []
-}, {
-    "label": "Lower-middle Class",
-    "name": "lower_middle_class",
-    "value": 0,
-    "guessedValue": 0,
-    "guessedSlices": []
-}, {
-    "label": "Upper-middle Class",
-    "name": "upper_middle_class",
-    "value": 5,
-    "guessedValue": 0,
-    "guessedSlices": []
-}, {
-    "label": "Upper Class",
-    "name": "upper_class",
-    "value": 5,
-    "guessedValue": 0,
-    "guessedSlices": []
-}, {
-    "label": "Upper Upper Class",
-    "name": "upper_upper_class",
-    "value": 90,
-    "guessedValue": 0,
-    "guessedSlices": []
-}];
+var availablePieces = JSON.parse(JSON.stringify(INITIAL_PIECES));
 
-availablePieces = [
-    {
-        "id": 1,
-        "value": 5,
-        "img": "images/slices/slice-1.png"
-    },
-    {
-        "id": 2,
-        "value": 5,
-        "img": "images/slices/slice-2.png"
-    },
-    {
-        "id": 3,
-        "value": 10,
-        "img": "images/slices/slice-3.png"
-    },
-    {
-        "id": 4,
-        "value": 10,
-        "img": "images/slices/slice-4.png"
-    },
-    {
-        "id": 5,
-        "value": 10,
-        "img": "images/slices/slice-5.png"
-    },
-    {
-        "id": 6,
-        "value": 10,
-        "img": "images/slices/slice-6.png"
-    },
-    {
-        "id": 7,
-        "value": 10,
-        "img": "images/slices/slice-7.png"
-    },
-    {
-        "id": 8,
-        "value": 10,
-        "img": "images/slices/slice-8.png"
-    },
-    {
-        "id": 9,
-        "value": 10,
-        "img": "images/slices/slice-9.png"
-    },
-    {
-        "id": 10,
-        "value": 10,
-        "img": "images/slices/slice-10.png"
-    },
-    {
-        "id": 11,
-        "value": 10,
-        "img": "images/slices/slice-11.png"
-    }
-];
+// Add Event Listeners
+$(document).ready(function() {
+    initializeBoard();
+    // Initialize game by assinging updating the main slice
+    updateSlice();
 
+    $('.droppable').on('click', function() {
+        var eClass = $(this).attr('eClass');
+        displayEClassOverlay(eClass);
+    });
 
-// Initialize game by assinging updating the main slice
-updateSlice();
+    // Score Overlay Delegation
+    $('#score-overlay').on('click', '.share-btn', function() { shareGame('#score-overlay'); });
+    $('#score-overlay').on('click', '.learn-more-btn', function() { window.open('https://inequality.org/facts/income-inequality/', '_blank'); });
+    $('#score-overlay').on('click', '.close-overlay-btn', function() { closeOverlay('#score-overlay'); });
+    $('#score-overlay').on('click', '.try-again-btn', function() { resetGame(); });
+    $('#score-overlay').on('click', '.show-answer-btn', function() { showAnswer(); });
 
+    // Slice Zone Delegation
+    $('#slice-zone').on('click', '.close-overlay-btn', function() { closeOverlay('#slice-zone'); });
+    $('#slice-zone').on('click', '.remove-slice-btn', function() {
+        var index = $(this).data('index');
+        var eClass = $(this).data('class');
+        removeSliceFromEClass(index, eClass);
+    });
+
+    // Post Game Controls Delegation (Play Again)
+    // Note: Home button is an <a> tag, so it works natively.
+    $(document).on('click', '.play-again-btn', function() { resetGame(); });
+});
+
+function initializeBoard() {
+    var container = $('#plate-container');
+    var template = document.getElementById('template-plate-item').content;
+
+    economicClasses.forEach(function(ec, index) {
+        var clone = template.cloneNode(true);
+        $(clone).find('.label-text').text(ec.label);
+        $(clone).find('.droppable').attr('eClass', index);
+        $(clone).find('.droppable img').attr('alt', ec.label + ' plate');
+        $(clone).find('.value-text').attr('id', 'eClass-label-' + index);
+        container.append(clone);
+    });
+}
 
 function mainLayerPointerEvents(state){
     if (state){
@@ -138,47 +90,17 @@ function displayScoreOverlay(correct, score = 100) {
         // Prepare the background board: Hide slice and show controls
         $('#slice-placeholder').hide();
         if ($('#post-game-controls').length === 0) {
-            $('.slice-placeholder-div').append(`
-                <div id="post-game-controls" class="text-center my-3" style="width: 100%;">
-                    <button class="btn btn-primary mr-2" onclick="resetGame()">Play Again</button>
-                    <a href="index.html" class="btn btn-primary ml-2">Home</a>
-                </div>
-            `);
+            var controlsTemplate = document.getElementById('template-post-game-controls').content.cloneNode(true);
+            $('.slice-placeholder-div').append(controlsTemplate);
         }
 
-        // HTML for overlay layer
-        var htmlValue = `
-    <div id="overlay-card" class="card">
+        // Clone Win Template
+        var template = document.getElementById('template-score-win').content.cloneNode(true);
         
-        <div class="card-header">
-            <div class="row align-items-center">
-                <div class="col-1"></div>
-                <div class="col-10 text-center">
-                    <h2>${cardHeader}</h2>
-                </div>
-                <div class="col-1">
-                    <button type="button" class="close" aria-label="Close" onClick="closeOverlay('${layerName}')">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="card-body">
-            <h5 class="card-title text-center">You guessed correctly.</h5>
-            <p class="text-center">We would like to encourage you to share this site and learn more about wealth inequality in the United States and around the globe.</p>
-            <div class="row justify-content-center">
-                <div class="col-12 text-center">
-                    <button type="button" class="btn btn-primary mr-2" onClick="shareGame('` + layerName + `')">Share</button>
-                    <button type="button" class="btn btn-primary ml-2" onClick="window.open('https://inequality.org/facts/income-inequality/', '_blank')">Learn More</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-        
-        
-    </div>
-    `;
+        clearLayer(layerName);
+        $(layerName).append(template);
+        mainLayerPointerEvents(false);
+        showOverlay(layerName);
 
     // If guess was not correct...
     } else {
@@ -197,42 +119,20 @@ function displayScoreOverlay(correct, score = 100) {
             cardHeader = 'Try to change things up!'
             //Uses default barType (danger - Red)
         }
-        // HTML for overlay layer
-        var htmlValue = `
-    <div id="overlay-card" class="card">
         
-        <div class="card-header">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <h2>${cardHeader}</h2>
-                </div>
-            </div>
-        </div>
-        <div class="card-body">
-            <h5 class="card-title text-center">Score: ${score}</h5>
-            <div class="progress my-3">
-                <div class="progress-bar progress-bar-striped progress-bar-animated bg-${barType}" role="progressbar" aria-valuenow="${score}" aria-valuemin="0" aria-valuemax="100" style="width: ${score}%"></div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-12 text-center">
-                    <button type="button" class="btn btn-primary mr-2" onClick="resetGame()">Try Again</button>
-                    <button type="button" class="btn btn-primary ml-2" onClick="showAnswer()">Show Answer</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
+        // Clone Loss Template
+        var template = document.getElementById('template-score-loss').content.cloneNode(true);
         
-        
-    </div>
-    
-    `;
+        // Populate Data
+        $(template).find('.score-header').text(cardHeader);
+        $(template).find('.score-text').text('Score: ' + Math.round(score));
+        $(template).find('.progress-bar').addClass('bg-' + barType).css('width', score + '%').attr('aria-valuenow', score);
+
+        clearLayer(layerName);
+        $(layerName).append(template);
+        mainLayerPointerEvents(false);
+        showOverlay(layerName);
     }
-    
-    clearLayer(layerName);
-    setLayerContents(layerName, htmlValue);
-    mainLayerPointerEvents(false);
-    showOverlay(layerName);
 
 }
 
@@ -240,45 +140,26 @@ function displayEClassOverlay(eClass){
     if (economicClasses[eClass]['guessedSlices'].length === 0) {
         return;
     }
+    if (economicClasses[eClass]['guessedSlices'].length === 0) {
+        return;
+    }
     var layerName = '#slice-zone';
     
-    var html = `
-    <div id="overlay-card" class="card">
-        <div class="card-header">
-            <div class="row justify-content-center">
-                <div class="col-12 text-center">
-                    <h3>Click or tap on the slice you want to remove</h3>
-                </div>
-            </div>
-        </div>
-        <div class="card-body" style="max-height: 60vh; overflow-y: auto;">
-            <div class="row justify-content-center align-items-center">`;
+    // Clone Template
+    var template = document.getElementById('template-slice-removal').content.cloneNode(true);
+    var $grid = $(template).find('.slice-grid');
 
     var arr = economicClasses[eClass]['guessedSlices'];
     for (var i = 0; i < arr.length; i++){
-        if (i > 0 && i % 4 == 0){
-            html += '</div><div class="row justify-content-center align-items-center mt-2">';
-        }
-        html += `
-            <div class="col-3 text-center">
-                <button type="button" onClick="removeSliceFromEClass(${i},${eClass})" style="cursor: pointer; background: transparent; border: none; padding: 0;">
-                    <img src="${arr[i]['img']}" style="max-height: 100px; width: auto;">
-                </button>
-            </div>`;
+        // Clone Item Template
+        var itemTemplate = document.getElementById('template-slice-item').content.cloneNode(true);
+        $(itemTemplate).find('img').attr('src', arr[i]['img']);
+        $(itemTemplate).find('button').data('index', i).data('class', eClass);
+        $grid.append(itemTemplate);
     }
-    
-    html += `
-            </div>
-            <div class="row justify-content-center mt-4">
-                <div class="col-12 text-center">
-                    <button type="button" class="btn btn-secondary" onClick="closeOverlay('#slice-zone')">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>`;
 
     clearLayer(layerName);
-    setLayerContents(layerName,html);
+    $(layerName).append(template);
     mainLayerPointerEvents(false);
     showOverlay(layerName);
 }
@@ -313,82 +194,106 @@ function checkGuess() {
     }
 }
 
-function changeValue(economicClass, sliceValue, changeType) {
-
-    if (changeType == "add") {
-
-        economicClass['guessedValue'] = parseInt(economicClass['guessedValue']) + parseInt(sliceValue);
-    } else if (changeType == "subtract") {
-
-        economicClass['guessedValue'] = parseInt(economicClass['guessedValue']) - parseInt(sliceValue);
-    }
-    $('#' + economicClass['name'] + '_label').html(economicClass['guessedValue']);
-}
-
 function updateSlice() {
+    // 1. Reset visibility state (hide draggable elements initially)
+    $('#slice-value').css('visibility', 'hidden');
+    $('#pie-image').css('visibility', 'hidden');
+    $('#slice-placeholder').css('visibility', 'hidden');
+
+    // 2. Calculate State
+    const sumOfGuesses = calculateSumOfGuesses();
     
-    var pieDOMElement = document.getElementById('pie-image');
-    var pieceDOMElement = document.getElementById('slice-placeholder');
-    var sliceValueDOMElement = document.getElementById('slice-value');
-    var remainingValueDOMElement = document.getElementById('remaining');
-        sliceValueDOMElement.style.visibility = 'hidden'
-        pieDOMElement.style.visibility = 'hidden';
-        pieceDOMElement.style.visibility = 'hidden';
-        const sumOfGuesses = economicClasses.reduce((sum, economicClasses) => {
-            return sum + parseInt(economicClasses.guessedValue);
-        }, 0);
-        remainingValueDOMElement.innerHTML = (100 - sumOfGuesses);
-    if(availablePieces.length > 0){
-        sliceValueDOMElement.innerHTML="$"+ availablePieces[0].value + " trillion";
+    // 3. Update UI Components
+    updateRemainingWealthUI(sumOfGuesses);
+    updatePlateVisuals();
+
+    // 4. Check Game Flow
+    if (availablePieces.length > 0) {
+        // Game continues: Show and update draggable slice
+        updateDraggableSlice();
         
-        if (sumOfGuesses != 100) {
-            var remaining = 100 - sumOfGuesses;
-            var imageValue = remaining;
-            
-            // Handle missing images (e.g. 85, 75, 5) by rounding to nearest 10
-            // We only have images for multiples of 10, plus 95.
-            if (remaining !== 95 && remaining % 10 !== 0) {
-                imageValue = Math.round(remaining / 10) * 10;
-            }
-            pieDOMElement.setAttribute('src', 'images/Pies/pie-' + imageValue + '.png');
-        }
-        console.log('show');
-        pieDOMElement.style.visibility = 'visible';
-        sliceValueDOMElement.style.visibility = 'visible';
-        pieceDOMElement.style.visibility = 'visible';
-        var sliceImage = document.getElementById('slice-image');
-        sliceImage.setAttribute('src', availablePieces[0].img)
-        pieceDOMElement.style.transform = 'none';
-        pieceDOMElement.setAttribute('data-y', 0);
-        pieceDOMElement.setAttribute('data-x', 0);
-        pieceDOMElement.setAttribute('slice-id', availablePieces[0].id);
-        pieceDOMElement.setAttribute('slice-value', availablePieces[0].value);
+        // Show main pie (it represents remaining wealth)
+        $('#pie-image').css('visibility', 'visible');
         
-        for (var i = 0; i < economicClasses.length; i++){
-            document.getElementById('eClass-label-' + i).innerHTML = '$' + economicClasses[i].guessedValue + ' trillion';
-            
-            // Update plate image to show the total wealth as a pie chart
-            var val = economicClasses[i].guessedValue;
-            var $droppable = $('.droppable[eClass="' + i + '"]');
-            var $img = $droppable.find('img');
-            
-            if (val > 0) {
-                $droppable.addClass('has-slices');
-                var imageValue = val;
-                if (val !== 95 && val % 10 !== 0) {
-                    imageValue = Math.round(val / 10) * 10;
-                    if (imageValue === 0) imageValue = 10;
-                }
-                $img.attr('src', 'images/Pies/pie-' + imageValue + '.png').css('opacity', 1);
-            } else {
-                $droppable.removeClass('has-slices');
-                $img.css('opacity', 0);
-            }
-        }
-        
-    }else{
+        // Update main pie image based on remaining wealth
+        updateMainPieImage(sumOfGuesses);
+
+    } else {
+        // Game Over: Check results
         checkGuess();
     }
+}
+
+function calculateSumOfGuesses() {
+    return economicClasses.reduce((sum, ec) => sum + parseInt(ec.guessedValue), 0);
+}
+
+function updateRemainingWealthUI(sumOfGuesses) {
+    var remaining = 100 - sumOfGuesses;
+    $('#remaining').html(remaining);
+}
+
+function updateMainPieImage(sumOfGuesses) {
+    var remaining = 100 - sumOfGuesses;
+    // Only update image if there is remaining wealth to show
+    if (remaining > 0) {
+        var imageValue = remaining;
+        // Handle missing images (e.g. 85, 75, 5) by rounding to nearest 10
+        // We only have images for multiples of 10, plus 95.
+        if (remaining !== 95 && remaining % 10 !== 0) {
+            imageValue = Math.round(remaining / 10) * 10;
+        }
+        $('#pie-image').attr('src', 'images/Pies/pie-' + imageValue + '.png');
+    }
+}
+
+function updateDraggableSlice() {
+    var currentPiece = availablePieces[0];
+    var $sliceVal = $('#slice-value');
+    var $slicePlaceholder = $('#slice-placeholder');
+    var $sliceImage = $('#slice-image');
+
+    // Update Text
+    $sliceVal.html("$" + currentPiece.value + " trillion").css('visibility', 'visible');
+
+    // Update Image
+    $sliceImage.attr('src', currentPiece.img);
+
+    // Update Attributes & Position
+    $slicePlaceholder.css({
+        'visibility': 'visible',
+        'transform': 'none'
+    }).attr({
+        'data-x': 0,
+        'data-y': 0,
+        'slice-id': currentPiece.id,
+        'slice-value': currentPiece.value
+    });
+}
+
+function updatePlateVisuals() {
+    economicClasses.forEach((ec, i) => {
+        // Update Label
+        $('#eClass-label-' + i).html('$' + ec.guessedValue + ' trillion');
+
+        // Update Plate Image
+        var $droppable = $('.droppable[eClass="' + i + '"]');
+        var $img = $droppable.find('img');
+        var val = ec.guessedValue;
+        
+        if (val > 0) {
+            $droppable.addClass('has-slices');
+            var imageValue = val;
+            if (val !== 95 && val % 10 !== 0) {
+                imageValue = Math.round(val / 10) * 10;
+                if (imageValue === 0) imageValue = 10;
+            }
+            $img.attr('src', 'images/Pies/pie-' + imageValue + '.png').css('opacity', 1);
+        } else {
+            $droppable.removeClass('has-slices');
+            $img.css('opacity', 0);
+        }
+    });
 }
 
 function addSliceToEClass(eClass, slice) {
@@ -505,12 +410,8 @@ function showAnswer() {
 
     // Add controls to return home or restart
     if ($('#post-game-controls').length === 0) {
-        $('.slice-placeholder-div').append(`
-            <div id="post-game-controls" class="text-center my-3" style="width: 100%;">
-                <button class="btn btn-primary mr-2" onclick="resetGame()">Play Again</button>
-                <a href="index.html" class="btn btn-primary ml-2">Home</a>
-            </div>
-        `);
+        var controlsTemplate = document.getElementById('template-post-game-controls').content.cloneNode(true);
+        $('.slice-placeholder-div').append(controlsTemplate);
     }
 }
 
@@ -522,63 +423,7 @@ function resetGame() {
     });
 
     // 2. Reset Available Pieces (Restore the original array)
-    availablePieces = [
-        {
-            "id": 1,
-            "value": 5,
-            "img": "images/slices/slice-1.png"
-        },
-        {
-            "id": 2,
-            "value": 5,
-            "img": "images/slices/slice-2.png"
-        },
-        {
-            "id": 3,
-            "value": 10,
-            "img": "images/slices/slice-3.png"
-        },
-        {
-            "id": 4,
-            "value": 10,
-            "img": "images/slices/slice-4.png"
-        },
-        {
-            "id": 5,
-            "value": 10,
-            "img": "images/slices/slice-5.png"
-        },
-        {
-            "id": 6,
-            "value": 10,
-            "img": "images/slices/slice-6.png"
-        },
-        {
-            "id": 7,
-            "value": 10,
-            "img": "images/slices/slice-7.png"
-        },
-        {
-            "id": 8,
-            "value": 10,
-            "img": "images/slices/slice-8.png"
-        },
-        {
-            "id": 9,
-            "value": 10,
-            "img": "images/slices/slice-9.png"
-        },
-        {
-            "id": 10,
-            "value": 10,
-            "img": "images/slices/slice-10.png"
-        },
-        {
-            "id": 11,
-            "value": 10,
-            "img": "images/slices/slice-11.png"
-        }
-    ];
+    availablePieces = JSON.parse(JSON.stringify(INITIAL_PIECES));
 
     // Remove post game controls if they exist
     $('#post-game-controls').remove();
