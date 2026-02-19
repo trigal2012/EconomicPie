@@ -1,38 +1,22 @@
-var availablePieces = JSON.parse(JSON.stringify(INITIAL_PIECES));
-
 // Add Event Listeners
 $(document).ready(function() {
     initializeBoard();
-    // Initialize game by assinging updating the main slice
+    distributeEvenly();
     updateSlice();
-
-    $('.droppable').on('click', function() {
-        var eClass = $(this).attr('eClass');
-        displayEClassOverlay(eClass);
-    });
-
+    
     // Score Overlay Delegation
     $('#score-overlay').on('click', '.share-btn', function() { shareGame('#score-overlay'); });
     $('#score-overlay').on('click', '.learn-more-btn', function() { window.open('https://inequality.org/facts/income-inequality/', '_blank'); });
     $('#score-overlay').on('click', '.close-overlay-btn', function() { closeOverlay('#score-overlay'); });
     $('#score-overlay').on('click', '.try-again-btn', function() { resetGame(); });
     $('#score-overlay').on('click', '.show-answer-btn', function() { showAnswer(); });
-
-    // Slice Zone Delegation
-    $('#slice-zone').on('click', '.close-overlay-btn', function() { closeOverlay('#slice-zone'); });
-    $('#slice-zone').on('click', '.remove-slice-btn', function() {
-        var index = $(this).data('index');
-        var eClass = $(this).data('class');
-        removeSliceFromEClass(index, eClass);
-    });
-
-    // Post Game Controls Delegation (Play Again)
-    // Note: Home button is an <a> tag, so it works natively.
     $(document).on('click', '.play-again-btn', function() { resetGame(); });
+    $('#slice-zone').on('click', '.cancel-move-btn', function() { closeOverlay('#slice-zone'); });
 });
 
 function initializeBoard() {
     var container = $('#plate-container');
+    container.empty(); // Clear any existing plates
     var template = document.getElementById('template-plate-item').content;
 
     economicClasses.forEach(function(ec, index) {
@@ -42,6 +26,13 @@ function initializeBoard() {
         $(clone).find('.droppable img').attr('alt', ec.label + ' plate');
         $(clone).find('.value-text').attr('id', 'eClass-label-' + index);
         container.append(clone);
+    });
+}
+
+function distributeEvenly() {
+    // Reset state before distributing
+    economicClasses.forEach(ec => {
+        ec.guessedValue = 20;
     });
 }
 
@@ -88,10 +79,9 @@ function displayScoreOverlay(correct, score = 100) {
         cardHeader = 'Congrats!'
 
         // Prepare the background board: Hide slice and show controls
-        $('#stacks-container').hide();
         if ($('#post-game-controls').length === 0) {
             var controlsTemplate = document.getElementById('template-post-game-controls').content.cloneNode(true);
-            $('.slice-placeholder-div').append(controlsTemplate);
+            $('#post-game-placeholder').append(controlsTemplate);
         }
 
         // Clone Win Template
@@ -136,163 +126,62 @@ function displayScoreOverlay(correct, score = 100) {
 
 }
 
-function displayEClassOverlay(eClass){
-    if (economicClasses[eClass]['guessedSlices'].length === 0) {
-        return;
-    }
-    if (economicClasses[eClass]['guessedSlices'].length === 0) {
-        return;
-    }
-    var layerName = '#slice-zone';
-    
-    // Clone Template
-    var template = document.getElementById('template-slice-removal').content.cloneNode(true);
-    var $grid = $(template).find('.slice-grid');
-
-    var arr = economicClasses[eClass]['guessedSlices'];
-    for (var i = 0; i < arr.length; i++){
-        // Clone Item Template
-        var itemTemplate = document.getElementById('template-slice-item').content.cloneNode(true);
-        $(itemTemplate).find('img').attr('src', arr[i]['img']);
-        $(itemTemplate).find('button').data('index', i).data('class', eClass);
-        $grid.append(itemTemplate);
-    }
-
-    clearLayer(layerName);
-    $(layerName).append(template);
-    mainLayerPointerEvents(false);
-    showOverlay(layerName);
-}
-
 function checkGuess() {
-    const sumOfGuesses = economicClasses.reduce((sum, ec) => {
-        return sum + ec.guessedValue;
+    const sumOfDifferences = economicClasses.reduce((sum, ec) => {
+        return sum + Math.abs(ec.value - ec.guessedValue);
     }, 0);
-    if (sumOfGuesses != 100) {
-        alert('Use all the wealth remaining ($' + (100 - sumOfGuesses) + ' trillion) before submitting your guess');
-    } else {
-        const sumOfDifferences = economicClasses.reduce((sum, economicClasses) => {
-            return sum + Math.abs(economicClasses.value - economicClasses.guessedValue);
-        }, 0);
-        // Calculate the maximum possible sum of absolute differences
-        const maxSumOfDifferences = 100;
-        // Calculate the score
-        var score = ((maxSumOfDifferences - sumOfDifferences) / maxSumOfDifferences) * 50;
+    // Calculate the maximum possible sum of absolute differences
+    const maxSumOfDifferences = 100;
+    // Calculate the score
+    var score = ((maxSumOfDifferences - sumOfDifferences) / maxSumOfDifferences) * 50;
 
-        if (score > 0) {
-            score += 50;
-        } else {
-            score = 50 + score;
-        }
-        if (score == 100) {
-            displayScoreOverlay(true);
-            // alert('You guessed correctly!');
-        } else {
-            displayScoreOverlay(false, score);
-            //alert('You guessed in-correct: ' + averageDifference);
-        }
+    if (score > 0) {
+        score += 50;
+    } else {
+        score = 50 + score;
+    }
+    if (score == 100) {
+        displayScoreOverlay(true);
+        // alert('You guessed correctly!');
+    } else {
+        displayScoreOverlay(false, score);
+        //alert('You guessed in-correct: ' + averageDifference);
     }
 }
 
 function updateSlice() {
-    // 1. Reset visibility state (hide draggable elements initially)
-    $('#pie-image').css('visibility', 'hidden');
-
-    // 2. Calculate State
-    const sumOfGuesses = calculateSumOfGuesses();
-    
-    // 3. Update UI Components
-    updateRemainingWealthUI(sumOfGuesses);
     updatePlateVisuals();
-
-    // 4. Check Game Flow
-    if (availablePieces.length > 0) {
-        // Game continues: Show and update draggable slice
-        updateStacks();
-        
-        // Show main pie (it represents remaining wealth)
-        $('#pie-image').css('visibility', 'visible');
-        
-        // Update main pie image based on remaining wealth
-        updateMainPieImage(sumOfGuesses);
-
-    } else {
-        // Game Over: Check results
-        $('#stacks-container').css('visibility', 'hidden');
-        checkGuess();
-    }
-}
-
-function calculateSumOfGuesses() {
-    return economicClasses.reduce((sum, ec) => sum + ec.guessedValue, 0);
-}
-
-function updateRemainingWealthUI(sumOfGuesses) {
-    var remaining = 100 - sumOfGuesses;
-    $('#remaining').html(remaining);
-}
-
-function updateMainPieImage(sumOfGuesses) {
-    var remaining = 100 - sumOfGuesses;
-    // Only update image if there is remaining wealth to show
-    if (remaining > 0) {
-        var imageValue = remaining;
-        // Handle missing images (e.g. 85, 75, 5) by rounding to nearest 10
-        // We only have images for multiples of 10, plus 95.
-        if (remaining !== 95 && remaining % 10 !== 0) {
-            imageValue = Math.round(remaining / 10) * 10;
-        }
-        // Ensure visual feedback when dropping the first 2.5T slice (97.5 -> 95 instead of rounding back to 100)
-        if (imageValue === 100 && remaining < 100) {
-            imageValue = 95;
-        }
-        $('#pie-image').attr('src', 'images/Pies/pie-' + imageValue + '.png');
-    }
-}
-
-function updateStacks() {
-    $('#stacks-container').css('visibility', 'visible');
-    
-    const stacks = [
-        { id: '#stack-2-5', val: 2.5 },
-        { id: '#stack-5', val: 5 },
-        { id: '#stack-10', val: 10 }
-    ];
-
-    stacks.forEach(stack => {
-        const hasPiece = availablePieces.some(p => p.value == stack.val);
-        const $el = $(stack.id);
-        
-        if (hasPiece) {
-            $el.parent().css('visibility', 'visible');
-            $el.css('transform', 'translate(0px, 0px)');
-            $el.attr('data-x', 0);
-            $el.attr('data-y', 0);
-        } else {
-            $el.parent().css('visibility', 'hidden');
-        }
-    });
 }
 
 function updatePlateVisuals() {
     economicClasses.forEach((ec, i) => {
         // Update Label
         $('#eClass-label-' + i).html('$' + ec.guessedValue + ' trillion');
+        var $wrapper = $('.plate-wrapper').eq(i);
 
         // Update Plate Image
         var $droppable = $('.droppable[eClass="' + i + '"]');
+
         var $img = $droppable.find('img');
         var val = ec.guessedValue;
-        
+        var startPrct = i * 20;
+        var endPrct = startPrct + val;
+
         if (val > 0) {
             $droppable.addClass('has-slices');
-            var imageValue = val;
-            if (val !== 95 && val % 10 !== 0) {
-                imageValue = Math.round(val / 10) * 10;
-                if (imageValue === 0) imageValue = 10;
+            // Use full pie and mask it to the specific value
+            $img.attr('src', 'images/Pies/pie-100.png').css('opacity', 1);
+            var mask = '';
+            if (endPrct <= 100) {
+                mask = 'conic-gradient(rgba(0,0,0,0) 0% ' + startPrct + '%, rgba(0,0,0,1) ' + startPrct + '% ' + endPrct + '%, rgba(0,0,0,0) ' + endPrct + '% 100%)';
+            } else {
+                var overflow = endPrct - 100;
+                mask = 'conic-gradient(rgba(0,0,0,1) 0% ' + overflow + '%, rgba(0,0,0,0) ' + overflow + '% ' + startPrct + '%, rgba(0,0,0,1) ' + startPrct + '% 100%)';
             }
-            $img.attr('src', 'images/Pies/pie-' + imageValue + '.png').css('opacity', 1);
-            $img.css({ '-webkit-mask-image': 'none', 'mask-image': 'none' });
+            $img.css({
+                '-webkit-mask-image': mask,
+                'mask-image': mask
+            });
         } else {
             $droppable.removeClass('has-slices');
             $img.css('opacity', 0);
@@ -301,103 +190,143 @@ function updatePlateVisuals() {
     });
 }
 
-function addSliceToEClass(eClass, slice) {
-    economicClasses[eClass]['guessedSlices'].push(slice);
-    economicClasses[eClass]['guessedValue'] += Number(slice['value']);
+function showMoveOptions(sourceClass, targetClass) {
+    var sourceValue = economicClasses[sourceClass].guessedValue;
+    var options = [];
+
+    // Progressive Increment Logic
+    if (sourceValue > 10) {
+        options.push(10);
+        options.push(5);
+        options.push(2.5);
+    } else { // sourceValue is 10 or less
+        if (sourceValue >= 2.5) options.push(2.5);
+        if (sourceValue >= 5) options.push(5);
+    }
+
+    // Filter out options that are equal to the total source value (redundant with Move All)
+    options = options.filter(opt => opt !== sourceValue);
+
+    // Always allow moving everything
+    options.push('All');
+
+    // If the only option is to move everything, just do it without showing the menu.
+    if (options.length === 1) {
+        executeMove(sourceClass, targetClass, sourceValue);
+        return;
+    }
+
+    var layerName = '#slice-zone';
+    var template = document.getElementById('template-move-menu').content.cloneNode(true);
+    var $list = $(template).find('.move-options-list');
+
+    options.forEach(opt => {
+        var btn = $('<button class="list-group-item list-group-item-action"></button>');
+        var label = (opt === 'All') ? 'Move All ($' + sourceValue + 'T)' : '$' + opt + ' Trillion';
+        btn.text(label);
+        btn.on('click', function() {
+            var amount = (opt === 'All') ? sourceValue : opt;
+            executeMove(sourceClass, targetClass, amount);
+        });
+        $list.append(btn);
+    });
+
+    clearLayer(layerName);
+    $(layerName).append(template);
+    mainLayerPointerEvents(false);
+    showOverlay(layerName);
 }
 
-function removeSliceFromEClass(sliceInex, eClass){
-    availablePieces.unshift(economicClasses[eClass]['guessedSlices'][sliceInex]);
-    economicClasses[eClass]['guessedValue'] -= economicClasses[eClass]['guessedSlices'][sliceInex]['value'];
-    economicClasses[eClass]['guessedSlices'].splice(sliceInex,1);
-    updateSlice();
+function executeMove(sourceClass, targetClass, amount) {
+    economicClasses[sourceClass].guessedValue -= amount;
+    economicClasses[targetClass].guessedValue += amount;
+    updatePlateVisuals();
     closeOverlay('#slice-zone');
 }
 
 interact('.droppable').dropzone({
-    // only accept elements matching this CSS selector
-    accept: '.slice',
+    accept: '.drag-handle',
     // Require pointer overlap for a drop to be possible
     overlap: 'pointer',
 
-
     // When slice is droped on square
     ondrop: function (event) {
-
-        // Get class dropped on
-        var currentClass = event.target.getAttribute('eClass');
-
-        // Get slice dropped
+        var targetClass = parseInt(event.target.getAttribute('eClass'));
         var draggableElement = event.relatedTarget;
-        var val = parseFloat(draggableElement.getAttribute('data-value'));
-        var index = availablePieces.findIndex(p => p.value == val);
         
-        if (index > -1) {
-             var dropped_slice = availablePieces.splice(index, 1)[0];
+        // Find the source class from the draggable element's parent droppable
+        var sourceClass = parseInt(draggableElement.getAttribute('data-source-class'));
 
-             // Reset the draggable element position immediately
-             draggableElement.style.transform = 'translate(0px, 0px)';
-             draggableElement.setAttribute('data-x', 0);
-             draggableElement.setAttribute('data-y', 0);
-
-             addSliceToEClass(currentClass, dropped_slice);
-             updateSlice();
+        if (sourceClass === targetClass) {
+            return;
         }
 
-
+        showMoveOptions(sourceClass, targetClass);
     },
     ondragleave: function (event) {
+        // Remove highlight when dragging away
         // Do NOTHING
     }
-
 })
 
-interact('.draggable')
+interact('.drag-handle')
     .draggable({
         inertia: true,
         listeners: {
-            // call this function on every dragmove event
-            move: dragMoveListener,
+            end(event) {
+                var target = event.target;
+                // Remove the ghost element
+                if (event.interaction.ghost) {
+                    event.interaction.ghost.remove();
+                }
+
+                // Reset the handle's position
+                target.style.transform = 'translate(0px, 0px)';
+                target.setAttribute('data-x', 0);
+                target.setAttribute('data-y', 0);
+
+                // If the drop was not on a valid target, restore the original pie's opacity.
+                if (!event.relatedTarget) {
+                    $(target).siblings('.pie-chart-img').css('opacity', 1);
+                }
+            },
+
+            move(event) {
+                if (event.interaction.ghost) {
+                    const ghost = event.interaction.ghost;
+                    // move the ghost element with the cursor
+                    ghost.style.left = event.pageX - (ghost.offsetWidth / 2) + 'px';
+                    ghost.style.top = event.pageY - (ghost.offsetHeight / 2) + 'px';
+                }
+            },
 
             start(event) {
                 var target = event.target;
-                target.style.zIndex = '1000';
-                sessionStorage.setItem('piece_id', target.getAttribute('id'));
-                sessionStorage.setItem('sliceID', event.target.getAttribute('id'));
+                var originalPie = $(target).siblings('.pie-chart-img')[0];
+
+                // Create a ghost element
+                const ghost = originalPie.cloneNode(true);
+                ghost.classList.add('ghost-image');
+                document.body.appendChild(ghost);
+
+                // Store the ghost on the interaction
+                event.interaction.ghost = ghost;
+
+                // Store source class on the handle itself for the drop event
+                var sourceClass = $(target).closest('.droppable').attr('eClass');
+                target.setAttribute('data-source-class', sourceClass);
+
+                // Provide visual feedback on the original pie
+                originalPie.style.opacity = 0.5;
             },
-            //
-            // call this function on every dragend event
-            end(event) {
-                var target = event.target;
-                target.style.zIndex = '';
-                if (!event.relatedTarget) {
-                    target.style.transform = 'translate(0px, 0px)';
-                    target.setAttribute('data-x', 0);
-                    target.setAttribute('data-y', 0);
-                }
-            }
         }
     })
-
-function dragMoveListener(event) {
-    var target = event.target;
-    // keep the dragged position in the data-x/data-y attributes
-    var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-    var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-
-    // translate the element
-    target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
-
-    target.setAttribute('data-x', x);
-    target.setAttribute('data-y', y);
-}
 
 function showAnswer() {
     closeOverlay('#score-overlay');
     
-    // Hide game controls
-    $('#stacks-container').hide();
-    $('#pie-image').css('visibility', 'hidden');
+    // Hide submit button
+    $('#submit-btn').hide();
     $('#remaining-container').html('Actual Wealth Distribution');
 
     for (var i = 0; i < economicClasses.length; i++) {
@@ -406,17 +335,24 @@ function showAnswer() {
         
         // Update plate images to show actual wealth as a pie chart
         var val = economicClasses[i].value;
+        var startPrct = i * 20;
+        var endPrct = startPrct + val;
         var $img = $('.droppable[eClass="' + i + '"] img');
         
         if (val > 0) {
-            var imageValue = val;
-            if (val !== 95 && val % 10 !== 0) {
-                imageValue = Math.round(val / 10) * 10;
-                if (imageValue === 0) imageValue = 10;
+            $img.removeClass('answer-slice-2-5');
+            $img.attr('src', 'images/Pies/pie-100.png').css('opacity', 1);
+
+            var mask = '';
+            if (endPrct <= 100) {
+                mask = 'conic-gradient(rgba(0,0,0,0) 0% ' + startPrct + '%, rgba(0,0,0,1) ' + startPrct + '% ' + endPrct + '%, rgba(0,0,0,0) ' + endPrct + '% 100%)';
+            } else {
+                var overflow = endPrct - 100;
+                mask = 'conic-gradient(rgba(0,0,0,1) 0% ' + overflow + '%, rgba(0,0,0,0) ' + overflow + '% ' + startPrct + '%, rgba(0,0,0,1) ' + startPrct + '% 100%)';
             }
-            $img.attr('src', 'images/Pies/pie-' + imageValue + '.png').css('opacity', 1);
-            $img.css({ '-webkit-mask-image': 'none', 'mask-image': 'none' });
+            $img.css({ '-webkit-mask-image': mask, 'mask-image': mask });
         } else {
+            $img.removeClass('answer-slice-2-5');
             $img.css('opacity', 0);
             $img.css({ '-webkit-mask-image': 'none', 'mask-image': 'none' });
         }
@@ -427,30 +363,30 @@ function showAnswer() {
     // Add controls to return home or restart
     if ($('#post-game-controls').length === 0) {
         var controlsTemplate = document.getElementById('template-post-game-controls').content.cloneNode(true);
-        $('.slice-placeholder-div').append(controlsTemplate);
+        $('#post-game-placeholder').append(controlsTemplate);
     }
+
+    // Show statistics
+    $('#answer-stats').show();
 }
 
 function resetGame() {
     // 1. Reset Economic Classes Data
-    economicClasses.forEach(function(ec) {
-        ec.guessedValue = 0;
-        ec.guessedSlices = [];
-    });
-
-    // 2. Reset Available Pieces (Restore the original array)
-    availablePieces = JSON.parse(JSON.stringify(INITIAL_PIECES));
+    distributeEvenly();
 
     // Remove post game controls if they exist
     $('#post-game-controls').remove();
 
     // Restore the remaining text container
-    $('#remaining-container').html('$<span id="remaining">100</span> Trillion Remaining');
+    $('#remaining-container').html('Drag slices between plates to guess the wealth distribution.');
 
     // 3. Re-enable interactions and update UI
     $('.droppable').css('pointer-events', 'auto');
-    $('#stacks-container').show();
     closeOverlay('#score-overlay');
+
+    // Hide statistics
+    $('#answer-stats').hide();
+    $('#submit-btn').show();
     updateSlice();
 }
 

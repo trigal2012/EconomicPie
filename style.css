@@ -140,12 +140,39 @@
 	pointer-events: none;
 	border-radius: 50%;
 	mix-blend-mode: multiply;
+	object-fit: contain;
+}
+.drag-handle {
+	position: absolute;
+	width: 60%;
+	height: 60%;
+	border-radius: 50%;
+	cursor: grab;
+	outline: none;
+}
+.ghost-image {
+	position: absolute;
+	width: 10vh !important;
+	height: 10vh !important;
+	opacity: 0.75;
+	z-index: 10000;
+	pointer-events: none; /* The ghost should not intercept drop events */
+	border-radius: 50%;
+	mix-blend-mode: multiply;
+	object-fit: contain;
+}
+.droppable .pie-chart-img {
+	pointer-events: none; /* The underlying image should not interfere */
+	outline: none;
 }
  @media (min-width: 1024px) {
 .droppable
 {
     aspect-ratio: 1 / 1;
 	height: 20vh;
+	width: 20vh;
+	margin-left: auto;
+	margin-right: auto;
 }
 }
 @media (max-width: 768px) {

@@ -28,38 +28,29 @@
                     <hr>
                     <p>Drag the slice of pie to the economic class you think it belongs to.</p>
                     <p>If you want to change a guess, tap a plate</p>
+                    <button id="submit-btn" class="btn btn-success my-2" onclick="checkGuess()">Submit Answer</button>
                     <hr>
                     </div>
-                    <div class="col-12 text-center"><img id="pie-image" src="images/Pies/pie-100.png" alt="full pie"></div>
                 </div>
             
-            <div class="row justify-content-center stacks-row">
-                <div class="col-12 text-center justify-content-center slice-placeholder-div">
-                    <div class="row justify-content-center" id="stacks-container">
-                        <div class="col-4 text-center">
-                            <div class="slice draggable" id="stack-2-5" data-value="2.5">
-                                <img src="images/slices/slice-12.png" alt="$2.5 Trillion slice">
-                            </div>
-                            <p class="mt-2 font-weight-bold stack-label">$2.5 Trillion</p>
-                        </div>
-                        <div class="col-4 text-center">
-                            <div class="slice draggable" id="stack-5" data-value="5">
-                                <img src="images/slices/slice-1.png" alt="$5 Trillion slice">
-                            </div>
-                            <p class="mt-2 font-weight-bold stack-label">$5 Trillion</p>
-                        </div>
-                        <div class="col-4 text-center">
-                            <div class="slice draggable" id="stack-10" data-value="10">
-                                <img src="images/slices/slice-4.png" alt="$10 Trillion slice">
-                            </div>
-                            <p class="mt-2 font-weight-bold stack-label">$10 Trillion</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <!-- Economic Class Plates -->
             <div id="plate-container" class="row py-2 justify-content-center">
                 <!-- Generated via JS -->
+            </div>
+            <!-- Placeholder for post-game controls -->
+            <div id="post-game-placeholder" class="text-center"></div>
+            <!-- Answer Statistics -->
+            <div id="answer-stats" class="row justify-content-center mt-4" style="display: none;">
+                <div class="col-md-8">
+                    <h3 class="text-center mb-3">The Reality of Wealth Distribution</h3>
+                    <ul class="list-group">
+                        <li class="list-group-item"><b>The Richest 20%:</b> Control 90% of all household wealth in the U.S.</li>
+                        <li class="list-group-item"><b>The Upper Middle Class (Next 20%):</b> Own 8% of the country’s wealth.</li>
+                        <li class="list-group-item"><b>The Middle Class (Middle 20%):</b> Own just 2% of the country’s wealth.</li>
+                        <li class="list-group-item"><b>The Lower Middle Class (Next 20%):</b> Own virtually nothing—their assets are almost entirely offset by their debts.</li>
+                        <li class="list-group-item"><b>The Poorest 20%:</b> Have negative wealth. On average, they are $6,000 in debt, starting every day "underwater."</li>
+                    </ul>
+                </div>
             </div>
         </div>
         </div>
@@ -121,36 +112,6 @@
     </div>
 </template>
 
-<template id="template-slice-removal">
-    <div class="card overlay-card">
-        <div class="card-header">
-            <div class="row justify-content-center">
-                <div class="col-12 text-center">
-                    <h3>Click or tap on the slice you want to remove</h3>
-                </div>
-            </div>
-        </div>
-        <div class="card-body" style="max-height: 60vh; overflow-y: auto;">
-            <div class="row justify-content-center align-items-center slice-grid">
-                <!-- Slices will be injected here -->
-            </div>
-            <div class="row justify-content-center mt-4">
-                <div class="col-12 text-center">
-                    <button type="button" class="btn btn-secondary close-overlay-btn">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
-<template id="template-slice-item">
-    <div class="col-3 text-center mb-2">
-        <button type="button" class="remove-slice-btn" style="cursor: pointer; background: transparent; border: none; padding: 0;">
-            <img class="slice-img" style="max-height: 100px; width: auto;" alt="Pie Slice">
-        </button>
-    </div>
-</template>
-
 <template id="template-post-game-controls">
     <div id="post-game-controls" class="text-center my-3" style="width: 100%;">
         <button class="btn btn-primary mr-2 play-again-btn">Play Again</button>
@@ -158,10 +119,23 @@
     </div>
 </template>
 
+<template id="template-move-menu">
+    <div class="col-12 text-center">
+        <h4>Move Amount</h4>
+        <div class="list-group mt-3 move-options-list">
+            <!-- Buttons generated via JS -->
+        </div>
+        <button class="btn btn-secondary mt-3 cancel-move-btn">Cancel</button>
+    </div>
+</template>
+
 <template id="template-plate-item">
-    <div class="col text-center px-1 d-flex flex-column">
+    <div class="col-4 col-md text-center px-1 d-flex flex-column mb-2 mb-md-0 position-relative plate-wrapper">
         <p class="small-text label-text"></p>
-        <button type="button" class="droppable"><img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="plate" style="opacity: 0;"></button>
+        <button type="button" class="droppable">
+            <img class="pie-chart-img" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="plate" style="opacity: 0;">
+            <div class="drag-handle"></div>
+        </button>
         <p class="value-text">0</p>
     </div>
 </template>
