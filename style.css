@@ -1,230 +1,66 @@
-#body-card
-{
-	border-radius: 2rem;
-	height: fit-content;
-	padding: 1rem;
-	width: 100%;
-}
-#gameContainer
-{
-	min-height: 100vh;
-	margin-top: 2rem;
-	padding: 0;
-	position: relative;
-}
-#game-layer
-{
-	min-height: 100vh;
-	padding-top: .75rem;
-	width: 100%;
-}
-.overlay-card
-{
-	border-radius: 2rem;
-	box-shadow: 1rem;
-	height: fit-content;
-	width: 75%;
-}
-#overlay-layer
-{
-	align-items: center;
-	background-color: #0000004f;
-	display: none;
-	height: 100vh;
-	justify-content: center;
-	position: absolute;
-	width: 100%;
-	z-index: 99999999;
-}
-#pie-image
-{
-	height: 10vh;
-	width: 10vh;
-}
-#score-overlay
-{
-	align-items: center;
-	background-color: #0000004f;
-	display: none;
-	height: 100vh;
-	justify-content: center;
-	position: absolute;
-	width: 100%;
-	z-index: 99999999;
-}
-#slice-zone
-{
-	align-items: center;
-	background-color: #0000004f;
-	display: none;
-	height: 100vh;
-	justify-content: center;
-	position: absolute;
-	width: 100%;
-	z-index: 99999999;
+:root {
+    --bg-dark: #0f172a;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --accent: #10b981;
+    --accent-glow: rgba(16, 185, 129, 0.3);
+    --text-main: #f8fafc;
 }
 
+body {
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    overflow-x: hidden;
+}
 
+/* Glassmorphism Card */
+.plate {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-.block-flex
-{
-	display: flex;
-	padding-bottom: 1rem;
+.plate:active { transform: scale(0.95); }
+
+/* The Liquid Pie Visual */
+.pie-visual {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    margin-bottom: 12px;
+    background: conic-gradient(var(--accent) calc(var(--percent) * 1%), transparent 0);
+    filter: drop-shadow(0 0 8px var(--accent-glow));
+    border: 4px solid rgba(255,255,255,0.05);
+    transition: 0.5s stroke-dasharray ease;
 }
-.btn
-{
-	background-color: #007BFF;
-	border: none;
-	border-radius: 5px;
-	color: #fff;
-	cursor: pointer;
-	font-size: 24px;
-	font-weight: bold;
-	padding: 10px 20px;
-	transition: background-color 0.3s ease-in-out;
+
+/* Floating Action Pills */
+.slice-pill {
+    background: var(--accent);
+    color: var(--bg-dark);
+    padding: 18px 30px;
+    border-radius: 18px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+    cursor: grab;
+    transition: 0.2s;
 }
-.btn:hover
-{
-	background-color: #0062CC;
+
+.slice-pill:hover { transform: translateY(-3px); }
+
+/* Progress Bar at Top */
+.progress-container {
+    width: 100%; height: 6px; background: rgba(255,255,255,0.1);
+    position: fixed; top: 0; left: 0;
 }
-.card-header
-{
-	border-top-left-radius: 2rem !important;
-	border-top-right-radius: 2rem !important;
-}
-.draggable
-{
-	height: 20vh;
-	ms-touch-action: none;
-	position: relative;
-	touch-action: none;
-	width: 20vh;
-	cursor: grab;
-}
-.draggable:active {
-	cursor: grabbing;
-}
-.draggable img {
-	height: 100%;
-	width: auto;
-}
-.droppable
-{
-	aspect-ratio: 1 / 1;
-	width: -webkit-fill-available;
-	background-image: url('images/Plate.png');
-	background-position: center;
-	background-repeat: no-repeat;
-	background-size: contain;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	border: none;
-	background-color: transparent;
-	padding: 0;
-	margin-top: auto;
-	cursor: default;
-}
-.droppable.has-slices {
-	cursor: pointer;
-	cursor: default;
-}
-.droppable.has-slices {
-	cursor: pointer;
-}
-.droppable img
-{
-	height: 60%;
-	width: 60%;
-	background-color: transparent;
-	pointer-events: none;
-	border-radius: 50%;
-	mix-blend-mode: multiply;
-}
- @media (min-width: 1024px) {
-.droppable
-{
-    aspect-ratio: 1 / 1;
-	height: 20vh;
-}
-}
-@media (max-width: 768px) {
-	.draggable {
-		width: 25vw;
-		height: 25vw;
-	}
-	h1 {
-		font-size: 1.75rem;
-	}
-	p {
-		font-size: 0.9rem;
-	}
-	.small-text {
-		font-size: 0.7rem;
-		line-height: 1.2;
-	}
-}
-.slice-placeholder-div
-{
-	display: flex;
-	height: auto;
-	overflow: visible;
-}
-.stacks-row {
-	margin-bottom: 5%;
-}
-.stack-label {
-	color: black;
-	pointer-events: none;
-}
-body
-{
-	align-content: center;
-	background-color: #f7f7f7;
-	display: flex;
-	flex-wrap: wrap;
-	font-size: 18px;
-	height: 100%;
-	overflow-y: scroll;
-}
-h1
-{
-	font-size: 36px;
-	margin-top: 0;
-}
-html,
-body
-{
-	max-width: 100%;
-	overflow-x: hidden;
-}
-img
-{
-	height: inherit;
-	width: inherit;
-}
-p
-{
-	font-size: 18px;
-}
-@media (max-width: 1024px) {
-	.draggable {
-		width: 25vw;
-		height: 25vw;
-	}
-	h1 {
-		font-size: 2.5rem;
-	}
-	p {
-		font-size: 1.1rem;
-	}
-	.small-text {
-		font-size: 0.85rem;
-		line-height: 1.2;
-	}
-	.label-text {
-		width: min-content;
-		margin-left: auto;
-		margin-right: auto;
-	}
+.progress-fill {
+    height: 100%; background: var(--accent); width: 0%;
+    transition: width 0.4s ease;
 }
