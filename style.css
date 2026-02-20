@@ -1,9 +1,22 @@
+:root {
+    --primary-color: #2c3e50; /* Dark Slate */
+    --accent-color: #f39c12; /* Warm Gold */
+    --success-color: #27ae60; /* Emerald */
+    --bg-color: #f4f6f7;
+    --text-color: #34495e;
+    --card-bg: rgba(255, 255, 255, 0.95);
+}
+
 #body-card
 {
-	border-radius: 2rem;
+	border-radius: 1.5rem;
 	height: fit-content;
 	padding: 1rem;
 	width: 100%;
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
 }
 #gameContainer
 {
@@ -11,6 +24,7 @@
 	padding: 0;
 	position: relative;
 	height: 100vh;
+	height: 100dvh; /* Use dynamic viewport height for mobile browsers */
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
 }
@@ -18,47 +32,57 @@
 {
 	padding-top: .75rem;
 	width: 100%;
-	padding-bottom: 2rem;
+	padding-bottom: 120px; /* Extra padding to ensure bottom text is scrollable */
 }
 .overlay-card
 {
 	border-radius: 2rem;
-	box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+	box-shadow: 0 10px 40px rgba(0,0,0,0.4);
 	height: fit-content;
 	width: 90%;
 	max-width: 400px;
-	background-color: #fff;
+	background-color: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(15px);
 	overflow: hidden;
 }
 #overlay-layer
 , #score-overlay
 , #slice-zone
 {
-	align-items: center;
 	background-color: #0000004f;
 	height: 100vh;
-	justify-content: center;
 	position: fixed;
 	width: 100%;
 	z-index: 99999999;
 	display: flex;
+    flex-direction: column;
 	opacity: 0;
 	pointer-events: none;
 	transition: opacity 1.5s ease;
+    overflow-y: auto; /* Enable scrolling for landscape/small screens */
+    -webkit-overflow-scrolling: touch;
 }
-#pie-image
-{
-	height: 10vh;
-	width: 10vh;
+
+/* Default centering for overlays using margin */
+#overlay-layer .overlay-card,
+#slice-zone .overlay-card {
+    margin: auto;
 }
+
 #score-overlay
 {
-	align-items: flex-end;
-	padding-bottom: 5vh;
+    /* No specific alignment needed here, handled by child margin */
 }
+
+#score-overlay .overlay-card {
+    margin-top: auto; /* Push to bottom */
+    margin-bottom: 5vh; /* Keep the padding */
+    margin-left: auto;
+    margin-right: auto;
+}
+
 #slice-zone
 {
-	align-items: center;
 }
 
 
@@ -70,20 +94,30 @@
 }
 .btn
 {
-	background-color: #007BFF;
+	background-color: var(--primary-color);
 	border: none;
-	border-radius: 5px;
+	border-radius: 50px; /* Pill shape */
 	color: #fff;
 	cursor: pointer;
-	font-size: 24px;
-	font-weight: bold;
-	padding: 10px 20px;
-	transition: background-color 1.5s ease-in-out;
+	font-size: 18px;
+	font-weight: 600;
+	padding: 12px 25px;
+	transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 .btn:hover
 {
-	background-color: #0062CC;
+	background-color: #34495e;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
+.btn-primary { background-color: var(--primary-color); }
+.btn-success { background-color: var(--success-color) !important; }
+.btn-info { background-color: #3498db; }
+.btn-secondary { background-color: #95a5a6; color: #2c3e50; }
+
 .card-header
 {
 	border-top-left-radius: 2rem !important;
@@ -93,22 +127,6 @@
 {
 	border-bottom-left-radius: 2rem !important;
 	border-bottom-right-radius: 2rem !important;
-}
-.draggable
-{
-	height: 20vh;
-	ms-touch-action: none;
-	position: relative;
-	touch-action: none;
-	width: 20vh;
-	cursor: grab;
-}
-.draggable:active {
-	cursor: grabbing;
-}
-.draggable img {
-	height: 100%;
-	width: auto;
 }
 .droppable
 {
@@ -126,13 +144,6 @@
 	padding: 0;
 	margin-top: auto;
 	cursor: default;
-}
-.droppable.has-slices {
-	cursor: pointer;
-	cursor: default;
-}
-.droppable.has-slices {
-	cursor: pointer;
 }
 .droppable img
 {
@@ -178,22 +189,6 @@
 	margin-right: auto;
 }
 }
-@media (max-width: 768px) {
-	.draggable {
-		width: 25vw;
-		height: 25vw;
-	}
-	h1 {
-		font-size: 1.75rem;
-	}
-	p {
-		font-size: 0.9rem;
-	}
-	.small-text {
-		font-size: 0.7rem;
-		line-height: 1.2;
-	}
-}
 .slice-placeholder-div
 {
 	display: flex;
@@ -201,15 +196,12 @@
 	overflow: visible;
 }
 .stacks-row {
-	margin-bottom: 5%;
-}
-.stack-label {
-	color: black;
-	pointer-events: none;
 }
 body
 {
-	background-color: #f7f7f7;
+	background: radial-gradient(circle at top left, #eef2f3, #dfe6e9);
+    color: var(--text-color);
+    font-family: 'Poppins', sans-serif;
 	font-size: 18px;
 	position: fixed;
 	width: 100%;
@@ -221,12 +213,11 @@ body
 h1
 {
 	font-size: 36px;
+    font-weight: 700;
 	margin-top: 0;
 }
 html,
 body
-{
-}
 img
 {
 	height: inherit;
@@ -236,25 +227,27 @@ p
 {
 	font-size: 18px;
 }
+.label-text {
+    font-weight: 700;
+    text-align: center;
+}
+#help-btn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    padding: 8px 15px;
+}
 @media (max-width: 1024px) {
-	.draggable {
-		width: 25vw;
-		height: 25vw;
-	}
 	h1 {
-		font-size: 2.5rem;
+		font-size: 1.75rem;
 	}
 	p {
-		font-size: 1.1rem;
+		font-size: 1rem;
 	}
 	.small-text {
-		font-size: 0.85rem;
+		font-size: 1.1rem;
 		line-height: 1.2;
-	}
-	.label-text {
-		width: min-content;
-		margin-left: auto;
-		margin-right: auto;
 	}
 	#body-card {
 		border-radius: 0;
@@ -262,6 +255,22 @@ p
 		box-shadow: none;
 		background: transparent;
 	}
+    .btn {
+        font-size: 16px;
+    }
+    
+    /* Mobile Drawer Style for Move Menu */
+    #slice-zone .overlay-card {
+        /* Remove fixed positioning to prevent cutoff and allow scrolling */
+        position: relative;
+        bottom: auto;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 25px 25px 0 0;
+        margin: 0;
+        margin-top: auto; /* Ensure it sticks to bottom in drawer mode */
+        padding-bottom: 20px;
+    }
 }
 .move-options-list .list-group-item {
     padding: 1rem;
@@ -269,8 +278,123 @@ p
     font-weight: 500;
 }
 
-#submit-btn:disabled {
-    background-color: #6c757d; /* Bootstrap's standard gray */
+#submit-btn:disabled, #reset-btn:disabled {
+    background-color: #bdc3c7; /* Lighter gray for disabled */
     border-color: #6c757d;
     opacity: 0.65; /* Keep the standard disabled opacity */
+    box-shadow: none;
+    transform: none;
+}
+
+.scrollable-body {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Landscape optimizations for mobile to save vertical space */
+@media (max-height: 600px) and (orientation: landscape) {
+    /* Game Board: Single horizontal row */
+    .game-board {
+        display: flex;
+        flex-wrap: nowrap; /* Force single line */
+        justify-content: center;
+        align-items: flex-end;
+        width: 100%;
+        height: 100%;
+        gap: 10px;
+    }
+
+    .plate-slot {
+        flex: 0 0 auto; /* Don't shrink/grow weirdly */
+        width: 18vh; /* Scale based on height */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .droppable {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1/1;
+    }
+
+    /* Position Help button at top left */
+    #help-btn {
+        top: 10px;
+        left: 10px;
+        right: auto;
+    }
+    
+    /* Center overlays in landscape for better visibility */
+    #score-overlay .overlay-card,
+    #slice-zone .overlay-card {
+        margin: auto;
+        border-radius: 1.5rem;
+        width: 95%;
+        max-width: 700px; /* Allow wider modal in landscape */
+        padding-bottom: 0;
+    }
+
+    /* Split-View Modal Strategy for Landscape */
+    #score-overlay .stats-modal-card {
+        display: grid;
+        grid-template-columns: 35% 65%;
+        grid-template-rows: 1fr auto;
+        grid-template-areas: 
+            "header body"
+            "header footer";
+        height: 85vh; /* Use available height */
+    }
+
+    #score-overlay .stats-modal-card .card-header {
+        grid-area: header;
+        border-right: 1px solid rgba(0,0,0,0.1);
+        border-bottom: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 1.5rem 0 0 1.5rem !important;
+        padding: 1rem;
+    }
+
+    #score-overlay .stats-modal-card .card-body {
+        grid-area: body;
+        overflow-y: auto;
+        max-height: none; /* Let grid handle height */
+    }
+
+    #score-overlay .stats-modal-card .card-footer {
+        grid-area: footer;
+        border-top: 1px solid rgba(0,0,0,0.1);
+        border-radius: 0 0 1.5rem 0 !important;
+    }
+}
+
+.action-buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Default Game Board Styles (Mobile Portrait & Desktop Base) */
+.game-board {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    gap: 10px;
+}
+
+.plate-slot {
+    width: 30%; /* 3 per row roughly */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+@media (min-width: 1024px) {
+    .plate-slot {
+        width: 18%; /* 5 in a row on desktop */
+    }
 }

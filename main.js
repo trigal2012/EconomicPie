@@ -4,6 +4,9 @@ $(document).ready(function() {
     distributeEvenly();
     updateSlice();
     
+    // Show Start Screen immediately
+    showStartScreen();
+
     // Score Overlay Delegation
     $('#score-overlay').on('click', '.share-btn', function() { shareGame('#score-overlay'); });
     $('#score-overlay').on('click', '.learn-more-btn', function() { window.open('https://inequality.org/facts/income-inequality/', '_blank'); });
@@ -11,13 +14,25 @@ $(document).ready(function() {
     $('#score-overlay').on('click', '.try-again-btn', function() { resetGame(); });
     $('#score-overlay').on('click', '.show-answer-btn', function() { showAnswer(); });
     $(document).on('click', '.play-again-btn', function() { resetGame(); });
+    $(document).on('click', '#reset-btn', function() { resetGame(); });
+    $(document).on('click', '#help-btn', function() { showStartScreen(); });
+    $(document).on('click', '.home-btn', function() { resetGame(); showStartScreen(); });
     $('#score-overlay').on('click', '.close-stats-and-show-inline', function() {
         closeOverlay('#score-overlay');
+        // Add post-game controls to main page now that modal is closing
+        if ($('#post-game-controls').length === 0) {
+            var controlsTemplate = document.getElementById('template-post-game-controls').content.cloneNode(true);
+            $('#post-game-placeholder').append(controlsTemplate);
+        }
         $('#answer-stats').fadeIn();
     });
     $('#score-overlay').on('click', '.share-facts-btn', shareFacts);
     $('#score-overlay').on('click', '.share-game-btn', function() { shareGame('#score-overlay'); });
     $('#slice-zone').on('click', '.cancel-move-btn', function() { closeOverlay('#slice-zone'); });
+    // Start Game button
+    $('#score-overlay').on('click', '.start-game-btn', function() {
+        closeOverlay('#score-overlay');
+    });
 });
 
 function initializeBoard() {
@@ -238,7 +253,8 @@ function showMoveOptions(sourceClass, targetClass) {
     options.forEach(opt => {
         var btn = $('<button class="list-group-item list-group-item-action"></button>');
         var label = (opt === 'All') ? 'Move All ($' + sourceValue + 'T)' : '$' + opt + ' Trillion';
-        btn.text(label);
+        var icon = (opt === 'All') ? '<i class="fas fa-exchange-alt mr-2"></i> ' : '<i class="fas fa-coins mr-2"></i> ';
+        btn.html(icon + label);
         btn.on('click', function() {
             var amount = (opt === 'All') ? sourceValue : opt;
             executeMove(sourceClass, targetClass, amount);
@@ -258,6 +274,7 @@ function executeMove(sourceClass, targetClass, amount) {
     updatePlateVisuals();
     closeOverlay('#slice-zone');
     $('#submit-btn').prop('disabled', false).addClass('btn-success');
+    $('#reset-btn').prop('disabled', false).addClass('btn-secondary');
     // Haptic feedback for a successful move
     if (navigator.vibrate) {
         navigator.vibrate(50); // Vibrate for 50ms
@@ -351,7 +368,9 @@ function showAnswer(isCorrect = false) {
     
     // Hide submit button
     $('#submit-btn').hide();
+    $('#reset-btn').hide();
     $('#remaining-container').html('Actual Wealth Distribution');
+    $('#game-instructions').hide();
 
     // Disable interactions
     $('.droppable').css('pointer-events', 'none');
@@ -366,10 +385,6 @@ function showAnswer(isCorrect = false) {
 
         // Then go straight to the modal after a delay
         setTimeout(() => {
-            if ($('#post-game-controls').length === 0) {
-                var controlsTemplate = document.getElementById('template-post-game-controls').content.cloneNode(true);
-                $('#post-game-placeholder').append(controlsTemplate);
-            }
             var layerName = '#score-overlay';
             var template = document.getElementById('template-stats-modal').content.cloneNode(true);
             $(template).find('h2').text('Congrats! You Got It Right!');
@@ -418,10 +433,6 @@ function showAnswer(isCorrect = false) {
 
             // 4. Wait, then show the stats modal
             setTimeout(() => {
-                if ($('#post-game-controls').length === 0) {
-                    var controlsTemplate = document.getElementById('template-post-game-controls').content.cloneNode(true);
-                    $('#post-game-placeholder').append(controlsTemplate);
-                }
                 var layerName = '#score-overlay';
                 var template = document.getElementById('template-stats-modal').content.cloneNode(true);
                 clearLayer(layerName);
@@ -444,6 +455,7 @@ function resetGame() {
 
     // Restore the remaining text container
     $('#remaining-container').html('Guess the distribution of $100 Trillion in wealth.');
+    $('#game-instructions').show();
 
     // 3. Re-enable interactions and update UI
     $('.droppable').css('pointer-events', 'auto');
@@ -451,8 +463,10 @@ function resetGame() {
 
     // Hide statistics
     $('#answer-stats').hide();
-    $('#submit-btn').show();
     $('#submit-btn').prop('disabled', true).removeClass('btn-success');
+    $('#reset-btn').prop('disabled', true).removeClass('btn-secondary');
+    $('#submit-btn').show();
+    $('#reset-btn').show();
     updateSlice();
 }
 
@@ -504,4 +518,16 @@ function shareFacts() {
         document.body.removeChild(dummy);
         alert('Stats copied to clipboard!');
     }
+}
+
+function showStartScreen() {
+    // Ensure we don't have a pending clear from a previous close (like from resetGame)
+    if (closeOverlayTimer) clearTimeout(closeOverlayTimer);
+
+    var layerName = '#score-overlay';
+    var template = document.getElementById('template-start-screen').content.cloneNode(true);
+    clearLayer(layerName);
+    $(layerName).append(template);
+    mainLayerPointerEvents(false);
+    showOverlay(layerName);
 }

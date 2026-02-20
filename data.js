@@ -5,19 +5,19 @@ var economicClasses = [{
     "guessedValue": 0,
     "guessedSlices": []
 }, {
-    "label": "Lower Middle Class (20\u201140%)",
+    "label": "Lower Middle (20\u201140%)",
     "name": "lower_middle_class",
     "value": 0,
     "guessedValue": 0,
     "guessedSlices": []
 }, {
-    "label": "Middle Class (40\u201160%)",
+    "label": "Middle (40\u201160%)",
     "name": "upper_middle_class",
     "value": 2.5,
     "guessedValue": 0,
     "guessedSlices": []
 }, {
-    "label": "Upper Middle Class (60\u201180%)",
+    "label": "Upper Middle (60\u201180%)",
     "name": "upper_class",
     "value": 7.5,
     "guessedValue": 0,
