@@ -11,6 +11,12 @@ $(document).ready(function() {
     $('#score-overlay').on('click', '.try-again-btn', function() { resetGame(); });
     $('#score-overlay').on('click', '.show-answer-btn', function() { showAnswer(); });
     $(document).on('click', '.play-again-btn', function() { resetGame(); });
+    $('#score-overlay').on('click', '.close-stats-and-show-inline', function() {
+        closeOverlay('#score-overlay');
+        $('#answer-stats').fadeIn();
+    });
+    $('#score-overlay').on('click', '.share-facts-btn', shareFacts);
+    $('#score-overlay').on('click', '.share-game-btn', function() { shareGame('#score-overlay'); });
     $('#slice-zone').on('click', '.cancel-move-btn', function() { closeOverlay('#slice-zone'); });
 });
 
@@ -45,7 +51,10 @@ function mainLayerPointerEvents(state){
 }
 
 function showOverlay(layerName){
-    $(layerName).css('display', 'flex');
+    $(layerName).css({
+        'opacity': '1',
+        'pointer-events': 'auto'
+    });
 }
 
 function clearLayer(layerName){
@@ -56,13 +65,20 @@ function setLayerContents(layerName, html){
     $(layerName).html(html);
 }
 
+var closeOverlayTimer = null;
+
 // Guess check overlay
 function closeOverlay(layerName) {
     var overlayLayer = $(layerName);
-    overlayLayer.hide();
-    clearLayer(layerName);
+    overlayLayer.css({
+        'opacity': '0',
+        'pointer-events': 'none'
+    });
+    if (closeOverlayTimer) clearTimeout(closeOverlayTimer);
+    closeOverlayTimer = setTimeout(() => {
+        clearLayer(layerName);
+    }, 1500); // Match CSS transition duration
     mainLayerPointerEvents(true);
-    
 }
 
 function displayScoreOverlay(correct, score = 100) {
@@ -141,8 +157,7 @@ function checkGuess() {
         score = 50 + score;
     }
     if (score == 100) {
-        displayScoreOverlay(true);
-        // alert('You guessed correctly!');
+        showAnswer(true);
     } else {
         displayScoreOverlay(false, score);
         //alert('You guessed in-correct: ' + averageDifference);
@@ -156,7 +171,7 @@ function updateSlice() {
 function updatePlateVisuals() {
     economicClasses.forEach((ec, i) => {
         // Update Label
-        $('#eClass-label-' + i).html('$' + ec.guessedValue + ' trillion');
+        $('#eClass-label-' + i).html('$' + parseFloat(ec.guessedValue.toFixed(1)) + ' trillion');
         var $wrapper = $('.plate-wrapper').eq(i);
 
         // Update Plate Image
@@ -242,6 +257,11 @@ function executeMove(sourceClass, targetClass, amount) {
     economicClasses[targetClass].guessedValue += amount;
     updatePlateVisuals();
     closeOverlay('#slice-zone');
+    $('#submit-btn').prop('disabled', false).addClass('btn-success');
+    // Haptic feedback for a successful move
+    if (navigator.vibrate) {
+        navigator.vibrate(50); // Vibrate for 50ms
+    }
 }
 
 interact('.droppable').dropzone({
@@ -322,52 +342,97 @@ interact('.drag-handle')
         }
     })
 
-function showAnswer() {
-    closeOverlay('#score-overlay');
+function showAnswer(isCorrect = false) {
+    // Ensure we don't have a pending clear from a previous close
+    if (closeOverlayTimer) clearTimeout(closeOverlayTimer);
+    
+    // We manually hide the overlay to ensure a clean slate, but without setting a clear timer
+    $('#score-overlay').css({'opacity': '0', 'pointer-events': 'none'});
     
     // Hide submit button
     $('#submit-btn').hide();
     $('#remaining-container').html('Actual Wealth Distribution');
 
-    for (var i = 0; i < economicClasses.length; i++) {
-        // Update label with actual value
-        $('#eClass-label-' + i).html('$' + economicClasses[i].value + ' trillion');
-        
-        // Update plate images to show actual wealth as a pie chart
-        var val = economicClasses[i].value;
-        var startPrct = i * 20;
-        var endPrct = startPrct + val;
-        var $img = $('.droppable[eClass="' + i + '"] img');
-        
-        if (val > 0) {
-            $img.removeClass('answer-slice-2-5');
-            $img.attr('src', 'images/Pies/pie-100.png').css('opacity', 1);
-
-            var mask = '';
-            if (endPrct <= 100) {
-                mask = 'conic-gradient(rgba(0,0,0,0) 0% ' + startPrct + '%, rgba(0,0,0,1) ' + startPrct + '% ' + endPrct + '%, rgba(0,0,0,0) ' + endPrct + '% 100%)';
-            } else {
-                var overflow = endPrct - 100;
-                mask = 'conic-gradient(rgba(0,0,0,1) 0% ' + overflow + '%, rgba(0,0,0,0) ' + overflow + '% ' + startPrct + '%, rgba(0,0,0,1) ' + startPrct + '% 100%)';
-            }
-            $img.css({ '-webkit-mask-image': mask, 'mask-image': mask });
-        } else {
-            $img.removeClass('answer-slice-2-5');
-            $img.css('opacity', 0);
-            $img.css({ '-webkit-mask-image': 'none', 'mask-image': 'none' });
-        }
-    }
     // Disable interactions
     $('.droppable').css('pointer-events', 'none');
 
-    // Add controls to return home or restart
-    if ($('#post-game-controls').length === 0) {
-        var controlsTemplate = document.getElementById('template-post-game-controls').content.cloneNode(true);
-        $('#post-game-placeholder').append(controlsTemplate);
+    if (isCorrect) {
+        // If correct, skip the animation. Just ensure the final state is rendered.
+        economicClasses.forEach((ec, index) => {
+            ec.guessedValue = ec.value; // Ensure it's the final value
+            $('#eClass-label-' + index).html('$' + ec.value + ' trillion');
+        });
+        updatePlateVisuals();
+
+        // Then go straight to the modal after a delay
+        setTimeout(() => {
+            if ($('#post-game-controls').length === 0) {
+                var controlsTemplate = document.getElementById('template-post-game-controls').content.cloneNode(true);
+                $('#post-game-placeholder').append(controlsTemplate);
+            }
+            var layerName = '#score-overlay';
+            var template = document.getElementById('template-stats-modal').content.cloneNode(true);
+            $(template).find('h2').text('Congrats! You Got It Right!');
+            $(template).find('.card-body').prepend('<p class="text-center text-success font-weight-bold">You correctly guessed the distribution of wealth. Here are the facts:</p>');
+            clearLayer(layerName);
+            $(layerName).append(template);
+            mainLayerPointerEvents(false);
+            showOverlay(layerName);
+        }, 500); // 0.5-second delay
+        return; // Exit so we don't run the animation code below
     }
 
-    // Show statistics
-    $('#answer-stats').show();
+    // 1. Set up animation parameters
+    const duration = 3000; // 4 seconds for the animation
+    let startTime = null;
+    
+    // Store initial and target values
+    const animationData = economicClasses.map(ec => ({
+        start: ec.guessedValue,
+        target: ec.value
+    }));
+
+    // Easing function (easeOutQuad)
+    const easeOutQuad = (t) => t * (2 - t);
+
+    // 2. Animation Loop
+    function animate(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        const easedProgress = easeOutQuad(progress);
+
+        if (progress < 1) {
+            animationData.forEach((data, index) => {
+                const diff = data.target - data.start;
+                economicClasses[index].guessedValue = data.start + (diff * easedProgress);
+            });
+            updatePlateVisuals();
+            requestAnimationFrame(animate);
+        } else {
+            // Ensure final values are exact and update labels one last time
+            economicClasses.forEach((ec, index) => {
+                ec.guessedValue = animationData[index].target;
+                $('#eClass-label-' + index).html('$' + ec.value + ' trillion');
+            });
+            updatePlateVisuals();
+
+            // 4. Wait, then show the stats modal
+            setTimeout(() => {
+                if ($('#post-game-controls').length === 0) {
+                    var controlsTemplate = document.getElementById('template-post-game-controls').content.cloneNode(true);
+                    $('#post-game-placeholder').append(controlsTemplate);
+                }
+                var layerName = '#score-overlay';
+                var template = document.getElementById('template-stats-modal').content.cloneNode(true);
+                clearLayer(layerName);
+                $(layerName).append(template);
+                mainLayerPointerEvents(false);
+                showOverlay(layerName);
+            }, 1500); // 1.5-second delay
+        }
+    }
+
+    requestAnimationFrame(animate);
 }
 
 function resetGame() {
@@ -378,7 +443,7 @@ function resetGame() {
     $('#post-game-controls').remove();
 
     // Restore the remaining text container
-    $('#remaining-container').html('Drag slices between plates to guess the wealth distribution.');
+    $('#remaining-container').html('Guess the distribution of $100 Trillion in wealth.');
 
     // 3. Re-enable interactions and update UI
     $('.droppable').css('pointer-events', 'auto');
@@ -387,6 +452,7 @@ function resetGame() {
     // Hide statistics
     $('#answer-stats').hide();
     $('#submit-btn').show();
+    $('#submit-btn').prop('disabled', true).removeClass('btn-success');
     updateSlice();
 }
 
@@ -410,4 +476,32 @@ function shareGame(layerName) {
         alert('Link copied to clipboard!');
     }
     // Overlay remains open so user can choose to Learn More or Close
+}
+
+function shareFacts() {
+    const statsText = [
+        "The Richest 20%: Control 90% of all household wealth in the U.S.",
+        "The Upper Middle Class (Next 20%): Own 8% of the country’s wealth.",
+        "The Middle Class (Middle 20%): Own just 2% of the country’s wealth.",
+        "The Lower Middle Class (Next 20%): Own virtually nothing—their assets are almost entirely offset by their debts.",
+        "The Poorest 20%: Have negative wealth. On average, they are $6,000 in debt, starting every day 'underwater.'"
+    ].join('\n');
+
+    const shareData = {
+        title: 'Economic Pie Facts',
+        text: statsText + '\n\nPlay the game: ' + window.location.href
+    };
+
+    if (navigator.share) {
+        navigator.share(shareData).catch((error) => console.log('Error sharing', error));
+    } else {
+        // Fallback: Copy text to clipboard
+        var dummy = document.createElement('textarea');
+        document.body.appendChild(dummy);
+        dummy.value = shareData.text;
+        dummy.select();
+        document.execCommand('copy');
+        document.body.removeChild(dummy);
+        alert('Stats copied to clipboard!');
+    }
 }

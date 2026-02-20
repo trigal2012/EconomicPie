@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Economic Pie</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -24,11 +25,10 @@
                 <div class="row justify-content-center">
                     <div class="col-12 text-center">
                         <h1>Economic Pie</h1>
-                        <p class="text-muted" id="remaining-container">$<span id="remaining">100</span> Trillion Remaining</p>
+                        <p class="text-muted" id="remaining-container">Guess the distribution of $100 Trillion in wealth.</p>
                     <hr>
-                    <p>Drag the slice of pie to the economic class you think it belongs to.</p>
-                    <p>If you want to change a guess, tap a plate</p>
-                    <button id="submit-btn" class="btn btn-success my-2" onclick="checkGuess()">Submit Answer</button>
+                    <p>Drag from one plate to another to move wealth. Click 'Submit Answer' when you're ready.</p>
+                    <button id="submit-btn" class="btn my-2" onclick="checkGuess()" disabled>Submit Answer</button>
                     <hr>
                     </div>
                 </div>
@@ -104,8 +104,8 @@
             </div>
             <div class="row justify-content-center">
                 <div class="col-12 text-center">
-                    <button type="button" class="btn btn-primary mr-2 try-again-btn">Try Again</button>
-                    <button type="button" class="btn btn-primary ml-2 show-answer-btn">Show Answer</button>
+                    <button type="button" class="btn btn-primary mx-2 try-again-btn">Try Again</button>
+                    <button type="button" class="btn btn-primary mx-2 show-answer-btn">Show Answer</button>
                 </div>
             </div>
         </div>
@@ -120,12 +120,51 @@
 </template>
 
 <template id="template-move-menu">
-    <div class="col-12 text-center">
-        <h4>Move Amount</h4>
-        <div class="list-group mt-3 move-options-list">
-            <!-- Buttons generated via JS -->
+    <div class="card overlay-card">
+        <div class="card-body text-center">
+            <h4 class="card-title">Move Amount</h4>
+            <div class="list-group mt-3 move-options-list">
+                <!-- Buttons generated via JS -->
+            </div>
+            <button class="btn btn-secondary mt-3 cancel-move-btn btn-block">Cancel</button>
         </div>
-        <button class="btn btn-secondary mt-3 cancel-move-btn">Cancel</button>
+    </div>
+</template>
+
+<template id="template-stats-modal">
+    <div class="card overlay-card">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col-1"></div>
+                <div class="col-10 text-center">
+                    <h2>The Reality of Wealth Distribution</h2>
+                </div>
+                <div class="col-1">
+                    <button type="button" class="close close-stats-and-show-inline" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body" style="max-height: 60vh; overflow-y: auto;">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><b>The Richest 20%:</b> Control 90% of all household wealth in the U.S.</li>
+                <li class="list-group-item"><b>The Upper Middle Class (Next 20%):</b> Own 8% of the country’s wealth.</li>
+                <li class="list-group-item"><b>The Middle Class (Middle 20%):</b> Own just 2% of the country’s wealth.</li>
+                <li class="list-group-item"><b>The Lower Middle Class (Next 20%):</b> Own virtually nothing—their assets are almost entirely offset by their debts.</li>
+                <li class="list-group-item"><b>The Poorest 20%:</b> Have negative wealth. On average, they are $6,000 in debt, starting every day "underwater."</li>
+            </ul>
+            <div class="row justify-content-center mt-4">
+                <div class="col-12 text-center">
+                    <button type="button" class="btn btn-info mx-1 share-facts-btn">Share Facts</button>
+                    <button type="button" class="btn btn-info mx-1 share-game-btn">Share Game</button>
+                    <button type="button" class="btn btn-info mx-1 learn-more-btn">Learn More</button>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-center bg-white border-0">
+            <button class="btn btn-primary mr-2 play-again-btn">Play Again</button>
+        </div>
     </div>
 </template>
 
