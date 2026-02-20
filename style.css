@@ -229,7 +229,9 @@ p
 }
 .label-text {
     font-weight: 700;
-    text-align: center;
+	width: min-content;
+	margin-left: auto;
+	margin-right: auto;
 }
 #help-btn {
     position: fixed;
@@ -293,20 +295,28 @@ p
 
 /* Landscape optimizations for mobile to save vertical space */
 @media (max-height: 600px) and (orientation: landscape) {
+    #body-card {
+        /* padding-left: 100px; Space for left-aligned buttons */
+    }
+
+	#help-btn {
+	display: none;
+	}
+
     /* Game Board: Single horizontal row */
     .game-board {
         display: flex;
         flex-wrap: nowrap; /* Force single line */
-        justify-content: center;
+        justify-content: space-around; /* Spread out to fill width */
         align-items: flex-end;
         width: 100%;
         height: 100%;
-        gap: 10px;
+        gap: 0;
     }
 
     .plate-slot {
-        flex: 0 0 auto; /* Don't shrink/grow weirdly */
-        width: 18vh; /* Scale based on height */
+        flex: 0 0 19%; /* Use width percentage to fill screen (5 * 19% = 95%) */
+        width: 19%;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -317,13 +327,6 @@ p
         height: auto;
         aspect-ratio: 1/1;
     }
-
-    /* Position Help button at top left */
-    #help-btn {
-        top: 10px;
-        left: 10px;
-        right: auto;
-    }
     
     /* Center overlays in landscape for better visibility */
     #score-overlay .overlay-card,
@@ -333,40 +336,6 @@ p
         width: 95%;
         max-width: 700px; /* Allow wider modal in landscape */
         padding-bottom: 0;
-    }
-
-    /* Split-View Modal Strategy for Landscape */
-    #score-overlay .stats-modal-card {
-        display: grid;
-        grid-template-columns: 35% 65%;
-        grid-template-rows: 1fr auto;
-        grid-template-areas: 
-            "header body"
-            "header footer";
-        height: 85vh; /* Use available height */
-    }
-
-    #score-overlay .stats-modal-card .card-header {
-        grid-area: header;
-        border-right: 1px solid rgba(0,0,0,0.1);
-        border-bottom: none !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 1.5rem 0 0 1.5rem !important;
-        padding: 1rem;
-    }
-
-    #score-overlay .stats-modal-card .card-body {
-        grid-area: body;
-        overflow-y: auto;
-        max-height: none; /* Let grid handle height */
-    }
-
-    #score-overlay .stats-modal-card .card-footer {
-        grid-area: footer;
-        border-top: 1px solid rgba(0,0,0,0.1);
-        border-radius: 0 0 1.5rem 0 !important;
     }
 }
 

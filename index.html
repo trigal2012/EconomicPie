@@ -1,50 +1,209 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-	<meta charset="UTF-8">
-	<title>Economic Pie</title>
-    <meta http-equiv="refresh" content="0; url=game.html">
-    <script>window.location.href = "game.html";</script>
-	<!-- Bootstrap CSS -->
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-	<link rel="icon" type="image/x-icon" href="./pie-icon.png">
-	<!-- Custom CSS -->
-	<style>
-		.container {
-			margin-top: 50px;
-		}
-		.jumbotron {
-			background-color: #f8f8f8;
-		}
-		.btn {
-			background-color: #d9534f;
-			color: #fff;
-			font-size: 20px;
-			padding: 10px 20px;
-			border-radius: 4px;
-			border: none;
-			margin-top: 30px;
-		}
-		.btn:hover {
-			background-color: #5cb85c;
-		}
-	</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Economic Pie</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css?v=1.01">
+    <link rel="icon" href="images/Pies/pie-100.png" type="image/png" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/x-icon" href="./pie-icon.png">
+    <script src="https://unpkg.com/interactjs/dist/interact.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
 </head>
+
 <body>
-	<div class="container">
-		<div class="jumbotron">
-			<h1>Economic Pie</h1>
-			<p>You will be given a virtual pie that represents all the private wealth in America, totaling $100 trillion dollars. Your task is to distribute the slices of the plate to one of five economic classes, each representing 20% of Americans, based on how much of the wealth you think they possess.</p>
-			<p>To play, simply drag the slices of pie to the economic class you think they belong to. Once you're satisfied with your distribution, click the "Submit Guess" button to see how you did.</p>
-			<p>Remember, the five economic classes each represent 20% of Americans, so your distribution should add up to 100%. Good luck, and have fun!</p>
-			<a href="game.html" class="btn btn-lg">Play Now</a>
-		</div>
-	</div>
-	<!-- jQuery -->
-	<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-	<!-- Bootstrap JavaScript -->
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <div class="container-fluid" id="gameContainer">
+        <div id="score-overlay"></div>
+        <button id="help-btn" class="btn btn-secondary"><i class="fas fa-question"></i></button>
+        <div id="slice-zone"></div>
+        <div id="game-layer">
+            <!-- Header -->
+            
+            <div id="body-card" class="card">
+                <div class="row justify-content-center">
+                    <div class="col-12 text-center">
+                        <div id="header-content">
+                            <h1>Economic Pie</h1>
+                            <p class="text-muted" id="remaining-container">Guess the distribution of $100 Trillion in wealth.</p>
+                            <hr>
+                            <p id="game-instructions">Drag from one plate to another to move wealth. Click 'Submit Answer' when you're ready.</p>
+                        </div>
+                    <div class="action-buttons-container my-2">
+                        <button id="reset-btn" class="btn" disabled><i class="fas fa-redo"></i><span class="btn-text"> Reset</span></button>
+                        <button id="submit-btn" class="btn" onclick="checkGuess()" disabled><i class="fas fa-check"></i><span class="btn-text"> Submit Answer</span></button>
+                    </div>
+                    <hr class="mt-0 mobile-hide">
+                    </div>
+                </div>
+            
+            <!-- Economic Class Plates -->
+            <div id="plate-container" class="game-board">
+                <!-- Generated via JS -->
+            </div>
+            <!-- Placeholder for post-game controls -->
+            <div id="post-game-placeholder" class="text-center"></div>
+            <!-- Answer Statistics -->
+            <div id="answer-stats" class="row justify-content-center mt-4" style="display: none;">
+                <div class="col-md-8">
+                    <h3 class="text-center mb-3">The Reality of Wealth Distribution</h3>
+                    <ul class="list-group">
+                        <li class="list-group-item"><b>The Richest 20%:</b> Control 90% of all household wealth in the U.S.</li>
+                        <li class="list-group-item"><b>The Upper Middle Class (Next 20%):</b> Own 8% of the country’s wealth.</li>
+                        <li class="list-group-item"><b>The Middle Class (Middle 20%):</b> Own just 2% of the country’s wealth.</li>
+                        <li class="list-group-item"><b>The Lower Middle Class (Next 20%):</b> Own virtually nothing—their assets are almost entirely offset by their debts.</li>
+                        <li class="list-group-item"><b>The Poorest 20%:</b> Have negative wealth. On average, they are $6,000 in debt, starting every day "underwater."</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+    <script src="data.js?v=1.0"></script>
+    <script src="main.js?v=1.1"></script>
 </body>
+
+<!-- Templates -->
+<template id="template-score-win">
+    <div class="card overlay-card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-start pt-2">
+                <div style="width: 30px;"></div> <!-- Spacer for centering -->
+                <h2 class="m-0">Congrats!</h2>
+                <div>
+                    <button type="button" class="close close-overlay-btn" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title text-center">You guessed correctly.</h5>
+            <p class="text-center">We would like to encourage you to share this site and learn more about wealth inequality in the United States and around the globe.</p>
+            <div class="row justify-content-center">
+                <div class="col-12 text-center d-flex flex-wrap justify-content-center">
+                    <button type="button" class="btn btn-primary m-1 flex-grow-1 share-btn"><i class="fas fa-share-alt"></i> Share</button>
+                    <button type="button" class="btn btn-primary m-1 flex-grow-1 learn-more-btn"><i class="fas fa-book-open"></i> Learn More</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="template-score-loss">
+    <div class="card overlay-card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h2 class="score-header">Game Over</h2>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title text-center score-text">Score</h5>
+            <div class="progress my-3">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-12 text-center d-flex flex-wrap justify-content-center">
+                    <button type="button" class="btn btn-primary m-1 flex-grow-1 try-again-btn"><i class="fas fa-redo"></i> Try Again</button>
+                    <button type="button" class="btn btn-primary m-1 flex-grow-1 show-answer-btn"><i class="fas fa-eye"></i> Show Answer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="template-post-game-controls">
+    <div id="post-game-controls" class="text-center my-3" style="width: 100%;">
+        <button class="btn btn-primary mr-2 play-again-btn"><i class="fas fa-redo"></i> Play Again</button>
+        <button class="btn btn-primary ml-2 home-btn"><i class="fas fa-home"></i> Home</button>
+    </div>
+</template>
+
+<template id="template-move-menu">
+    <div class="card overlay-card">
+        <div class="card-body text-center">
+            <h4 class="card-title mb-3">Move Amount</h4>
+            <div class="list-group mt-3 move-options-list">
+                <!-- Buttons generated via JS -->
+            </div>
+            <button class="btn btn-secondary mt-3 cancel-move-btn btn-block"><i class="fas fa-times"></i> Cancel</button>
+        </div>
+    </div>
+</template>
+
+<template id="template-stats-modal">
+    <div class="card overlay-card stats-modal-card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-start pt-2">
+                <div style="width: 30px;"></div> <!-- Spacer for centering -->
+                <h2 class="m-0 text-center flex-grow-1">The Reality of Wealth Distribution</h2>
+                <div>
+                    <button type="button" class="close close-stats-and-show-inline" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body scrollable-body">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><b>The Richest 20%:</b> Control 90% of all household wealth in the U.S.</li>
+                <li class="list-group-item"><b>The Upper Middle Class (Next 20%):</b> Own 8% of the country’s wealth.</li>
+                <li class="list-group-item"><b>The Middle Class (Middle 20%):</b> Own just 2% of the country’s wealth.</li>
+                <li class="list-group-item"><b>The Lower Middle Class (Next 20%):</b> Own virtually nothing—their assets are almost entirely offset by their debts.</li>
+                <li class="list-group-item"><b>The Poorest 20%:</b> Have negative wealth. On average, they are $6,000 in debt, starting every day "underwater."</li>
+            </ul>
+            <div class="row justify-content-center mt-4">
+                <div class="col-12 text-center d-flex flex-wrap justify-content-center">
+                    <button type="button" class="btn btn-info m-1 flex-grow-1 share-facts-btn"><i class="fas fa-copy"></i> Share Facts</button>
+                    <button type="button" class="btn btn-info m-1 flex-grow-1 share-game-btn"><i class="fas fa-share-alt"></i> Share Game</button>
+                    <button type="button" class="btn btn-info m-1 flex-grow-1 learn-more-btn"><i class="fas fa-book-open"></i> Learn More</button>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-center bg-white border-0">
+            <button class="btn btn-primary mr-2 play-again-btn"><i class="fas fa-redo"></i> Play Again</button>
+        </div>
+    </div>
+</template>
+
+<template id="template-plate-item">
+    <div class="plate-slot position-relative plate-wrapper">
+        <p class="small-text label-text"></p>
+        <button type="button" class="droppable">
+            <img class="pie-chart-img" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="plate" style="opacity: 0;">
+            <div class="drag-handle"></div>
+        </button>
+        <p class="value-text">0</p>
+    </div>
+</template>
+
+<template id="template-start-screen">
+    <div class="card overlay-card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-start pt-2">
+                <div style="width: 30px;"></div> <!-- Spacer for centering -->
+                <h2 class="m-0">Economic Pie</h2>
+                <div>
+                    <button type="button" class="close start-game-btn" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body scrollable-body">
+            <p>You will be given a virtual pie that represents all the private wealth in America, totaling $100 trillion dollars.</p>
+            <p>Your task is to distribute the wealth to five economic classes, each representing 20% of Americans, based on how much you think they possess.</p>
+            <p>Drag from one plate to another to move wealth. When you are satisfied, click "Submit Answer".</p>
+        </div>
+    </div>
+</template>
+
 </html>
 <p>
 </p>

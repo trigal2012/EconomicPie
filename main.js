@@ -33,6 +33,22 @@ $(document).ready(function() {
     $('#score-overlay').on('click', '.start-game-btn', function() {
         closeOverlay('#score-overlay');
     });
+    
+    // Click outside to close logic
+    $('#score-overlay').on('click', function(e) {
+        if (e.target === this) {
+            var closeBtn = $(this).find('.close-overlay-btn, .close-stats-and-show-inline, .start-game-btn');
+            if (closeBtn.length > 0) {
+                closeBtn.first().click();
+            }
+        }
+    });
+
+    $('#slice-zone').on('click', function(e) {
+        if (e.target === this) {
+            closeOverlay('#slice-zone');
+        }
+    });
 });
 
 function initializeBoard() {
