@@ -144,6 +144,7 @@
 	padding: 0;
 	margin-top: auto;
 	cursor: default;
+    -webkit-tap-highlight-color: transparent;
 }
 .droppable img
 {
@@ -163,6 +164,11 @@
 	cursor: grab;
 	touch-action: none;
 	outline: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none; /* Prevent context menu on long press */
+}
+.droppable:focus, .droppable:focus-visible, .drag-handle:focus {
+    outline: none;
 }
 .ghost-image {
 	position: absolute;
@@ -295,14 +301,6 @@ p
 
 /* Landscape optimizations for mobile to save vertical space */
 @media (max-height: 600px) and (orientation: landscape) {
-    #body-card {
-        /* padding-left: 100px; Space for left-aligned buttons */
-    }
-
-	#help-btn {
-	display: none;
-	}
-
     /* Game Board: Single horizontal row */
     .game-board {
         display: flex;

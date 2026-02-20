@@ -5,26 +5,26 @@ Welcome to the Economic Pie Game! This is an interactive web-based game designed
 
 ## Summary
 
-The game presents players with a virtual pie representing $100 trillion of private wealth in America. The objective is to distribute slices of this pie among five different economic classes, from the "Poorest 20%" to the "Richest 20%".
+The game presents players with a virtual pie representing $100 trillion of private wealth in America. The game begins with this wealth distributed evenly among five economic classes (20% each). The objective is to redistribute this wealth to reflect what the player believes is the actual distribution in the United States, from the "Poorest 20%" to the "Richest 20%".
 
-Players drag and drop pie slices, each representing a certain trillion-dollar value, onto the plates corresponding to the economic classes. Once all the "wealth" has been distributed, players can submit their guess to see how it compares to the actual distribution of wealth. The game provides a score based on the accuracy of the guess and encourages players to learn more about wealth inequality.
+Players drag from one plate to another to move wealth in specific increments. Once satisfied, players submit their guess to see how it compares to reality. The game reveals the actual distribution through an animation and provides detailed statistics.
 
 ## Game Features & User Actions
 
 This application supports the following interactions:
 
-*   **Distribute Wealth:** Drag pie slices (representing $5T or $10T) onto the plates of different economic classes.
-*   **Modify Distribution:** Click or tap on a plate to remove the last added slice if you want to change your guess.
-*   **Real-time Tracking:** The game tracks the remaining wealth to be distributed in real-time.
-*   **Validation:** Users must distribute exactly $100 Trillion before the game calculates the score.
+*   **Redistribute Wealth:** Drag from one plate to another to open a transfer menu. Select an amount to move ($2.5T, $5T, $10T, or All).
+*   **Quick Move (Double Tap):** Double-click or double-tap a plate to instantly move all $100 Trillion to that specific class.
+*   **Dynamic Visuals:** Pie charts on the plates grow and shrink in real-time as wealth is moved.
 *   **Scoring System:**
     *   **Correct Guess:** If the distribution matches reality, a "Congrats" screen appears.
     *   **Incorrect Guess:** A score is calculated based on the deviation from the actual values.
-*   **Post-Game Options:**
-    *   **Show Answer:** Reveals the true wealth distribution in the US.
-    *   **Share:** Allows users to share the game via native sharing (mobile) or clipboard copy (desktop).
-    *   **Learn More:** Directs users to external resources to learn about inequality.
-    *   **Play Again:** Resets the board to play from the beginning.
+*   **Reveal & Learn:**
+    *   **Show Answer:** An animation transitions the user's guess to the actual distribution.
+    *   **Statistics:** A modal displays key facts about wealth inequality after the reveal.
+    *   **Share:** Users can share the game link or the specific wealth statistics.
+    *   **Learn More:** Directs users to external resources.
+*   **Responsive Design:** Optimized layouts for Mobile Portrait, Mobile Landscape, and Desktop.
 
 ## How to Run Locally
 
@@ -64,17 +64,19 @@ You can play the live version of the game here:
 
 *   **HTML5**
 *   **CSS3** (with Bootstrap for styling)
+*   **CSS Grid & Flexbox** for custom responsive layouts
 *   **JavaScript (ES6)**
 *   **jQuery**
 *   **Interact.js** for drag-and-drop functionality
-*   **AngularJS** (Note: AngularJS is included but does not appear to be actively used in the core game logic.)
+*   **FontAwesome** for icons
+*   **Google Fonts** (Poppins)
 
 ### File Structure
 
-*   `index.html`: The landing page that explains the game.
-*   `game.html`: The main page where the game is played.
-*   `main.js`: Contains all the JavaScript logic for the game, including game state, user interactions, and scoring.
-*   `style.css`: Custom styles for the game.
+*   `index.html`: The main entry point containing the game interface and templates.
+*   `main.js`: Contains all the JavaScript logic for game state, user interactions, animations, and scoring.
+*   `style.css`: Custom styles, including responsive layouts and glassmorphism effects.
+*   `data.js`: JSON data defining the economic classes and initial values.
 *   `images/`: Contains all the image assets for the pie, slices, and plates.
 
 ## How to Contribute
@@ -111,17 +113,17 @@ Use this checklist to verify functionality before releasing updates. Copy this i
 
 ### 1. Smoke Test (Critical Path)
 - [ ] **Load Index:** Open `index.html`. Verify "Play Now" button is visible.
-- [ ] **Start Game:** Click "Play Now". Verify redirection to `game.html`.
-- [ ] **Game Load:** Verify Pie (top right), Slice (center), and 5 Plates (bottom) are visible.
-- [ ] **Interaction:** Drag one slice to a plate. Verify "Remaining" drops to $95 Trillion.
-- [ ] **Reset:** Refresh page. Verify game resets to $100 Trillion.
+- [ ] **Start Game:** Click "Start Game" on the modal. Verify game board is interactive.
+- [ ] **Game Load:** Verify 5 Plates are visible with 20% ($20T) each.
+- [ ] **Interaction:** Drag from one plate to another. Verify menu appears. Select amount. Verify plates update.
+- [ ] **Reset:** Click Reset button. Verify game resets to 20/20/20/20/20.
 
 ### 2. Functional Testing
-- [ ] **F01 Drag & Drop:** Drag slice to "Poorest 20%". Slice appears on plate as pie chart. Label = "$5 Trillion".
-- [ ] **F02 Counter:** "Remaining" counter decreases by exact slice value.
-- [ ] **F03 Main Pie:** Top right pie image shrinks/changes as wealth decreases.
-- [ ] **F04 Plate Visuals:** Plate image changes to pie chart upon drop.
-- [ ] **F05 Completion:** Distribute $100T. Scoring overlay appears automatically.
+- [ ] **F01 Drag & Drop:** Drag from Plate A to Plate B. Ghost image follows cursor.
+- [ ] **F02 Move Menu:** Drop on Plate B. Menu shows valid options (2.5, 5, 10, All).
+- [ ] **F03 Visuals:** Pie charts update to reflect new values (e.g., 17.5 vs 22.5).
+- [ ] **F04 Double Tap:** Double tap a plate. It becomes 100 ($100T), others become 0.
+- [ ] **F05 Submit:** Button enables after first move. Click Submit.
 - [ ] **F06 Win State:** Distribute 0, 0, 5, 5, 90. Verify "Congrats!" overlay.
 - [ ] **F07 Loss State:** Distribute evenly. Verify score overlay.
 - [ ] **F08 Show Answer:** Click "Show Answer". Board locks. Plates show 0, 0, 5, 5, 90. "Play Again" appears.
@@ -129,10 +131,9 @@ Use this checklist to verify functionality before releasing updates. Copy this i
 - [ ] **F10 Remove Slice:** Click slice in overlay. Slice returns to pile. Plate value decreases.
 
 ### 3. Negative Testing
-- [ ] **N01 Drop in Void:** Drop slice between plates. Returns to center.
-- [ ] **N02 Rapid Drag:** Drag quickly. No double counting.
-- [ ] **N03 Out of Bounds:** Drag off screen. Returns to center.
-- [ ] **N04 Missing Images:** Create remaining value of 85 (Drag 5, Drag 10, Remove 5). Game should not crash/image should not disappear.
+- [ ] **N01 Drop in Void:** Drag plate handle and drop on background. Ghost disappears, no change.
+- [ ] **N02 Drop on Self:** Drag plate handle and drop on same plate. No change.
+- [ ] **N03 Cancel Move:** Drag, Drop, then click Cancel in menu. No change.
 
 ## Operational Details (For Maintainers)
 

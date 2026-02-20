@@ -1,3 +1,6 @@
+// Global variable for double-tap timing, shared between click and drag handlers
+var lastTap = 0;
+
 // Add Event Listeners
 $(document).ready(function() {
     initializeBoard();
@@ -28,7 +31,10 @@ $(document).ready(function() {
     });
     $('#score-overlay').on('click', '.share-facts-btn', shareFacts);
     $('#score-overlay').on('click', '.share-game-btn', function() { shareGame('#score-overlay'); });
-    $('#slice-zone').on('click', '.cancel-move-btn', function() { closeOverlay('#slice-zone'); });
+    $('#slice-zone').on('click', '.cancel-move-btn', function() { 
+        closeOverlay('#slice-zone'); 
+        updatePlateVisuals(); // Restore opacity if cancelled
+    });
     // Start Game button
     $('#score-overlay').on('click', '.start-game-btn', function() {
         closeOverlay('#score-overlay');
@@ -47,7 +53,33 @@ $(document).ready(function() {
     $('#slice-zone').on('click', function(e) {
         if (e.target === this) {
             closeOverlay('#slice-zone');
+            updatePlateVisuals(); // Restore opacity if cancelled
         }
+    });
+
+    // Custom Double Tap Logic
+    $(document).on('touchend click', '.drag-handle', function(e) {
+        var currentTime = new Date().getTime();
+        var tapLength = currentTime - lastTap;
+        
+        if (tapLength < 300 && tapLength > 0) {
+            // Double Tap Detected
+            e.preventDefault(); // Prevent default zoom or other actions
+            $('.ghost-image').remove(); // Clear any ghosts from the first tap
+            var targetClass = parseInt($(this).closest('.droppable').attr('eClass'));
+            moveAllWealthTo(targetClass);
+        }
+        lastTap = currentTime;
+    });
+
+    // Global cleanup for stuck ghosts on interaction end
+    $(document).on('mouseup touchend touchcancel pointercancel', function() {
+        document.querySelectorAll('.ghost-image').forEach(el => el.remove());
+    });
+
+    // Aggressive cleanup on new touch start to prevent stuck ghosts
+    $(document).on('touchstart mousedown', function(e) {
+        document.querySelectorAll('.ghost-image').forEach(el => el.remove());
     });
 });
 
@@ -297,6 +329,24 @@ function executeMove(sourceClass, targetClass, amount) {
     }
 }
 
+function moveAllWealthTo(targetClass) {
+    economicClasses.forEach((ec, index) => {
+        if (index === targetClass) {
+            ec.guessedValue = 100;
+        } else {
+            ec.guessedValue = 0;
+        }
+    });
+    updatePlateVisuals();
+    $('#submit-btn').prop('disabled', false).addClass('btn-success');
+    $('#reset-btn').prop('disabled', false).addClass('btn-secondary');
+    
+    // Haptic feedback
+    if (navigator.vibrate) {
+        navigator.vibrate(50);
+    }
+}
+
 interact('.droppable').dropzone({
     accept: '.drag-handle',
     // Require pointer overlap for a drop to be possible
@@ -311,6 +361,7 @@ interact('.droppable').dropzone({
         var sourceClass = parseInt(draggableElement.getAttribute('data-source-class'));
 
         if (sourceClass === targetClass) {
+            $(draggableElement).siblings('.pie-chart-img').css('opacity', 1);
             return;
         }
 
@@ -331,6 +382,7 @@ interact('.drag-handle')
                 // Remove the ghost element
                 if (event.interaction.ghost) {
                     event.interaction.ghost.remove();
+                    event.interaction.ghost = null;
                 }
 
                 // Reset the handle's position
@@ -345,6 +397,43 @@ interact('.drag-handle')
             },
 
             move(event) {
+                var target = event.target;
+                if (!event.interaction.pointerIsDown) return;
+
+                // If we are dragging, this is definitely not a double-tap. Reset the tap timer.
+                lastTap = 0;
+
+                // Create ghost on first move if not exists (prevents ghost on single tap)
+                if (!event.interaction.ghost) {
+                    document.querySelectorAll('.ghost-image').forEach(el => el.remove()); // Ensure no other ghosts exist
+
+                    var sourceClass = parseInt(target.getAttribute('data-source-class'));
+                    var ec = economicClasses[sourceClass];
+                    var val = ec.guessedValue;
+                    
+                    // Only create ghost if there is value to move
+                    if (val > 0) {
+                        // Reconstruct mask logic from data to ensure ghost matches the plate exactly
+                        var i = sourceClass;
+                        var startPrct = i * 20;
+                        var endPrct = startPrct + val;
+                        var mask = (endPrct <= 100) 
+                            ? 'conic-gradient(rgba(0,0,0,0) 0% ' + startPrct + '%, rgba(0,0,0,1) ' + startPrct + '% ' + endPrct + '%, rgba(0,0,0,0) ' + endPrct + '% 100%)'
+                            : 'conic-gradient(rgba(0,0,0,1) 0% ' + (endPrct - 100) + '%, rgba(0,0,0,0) ' + (endPrct - 100) + '% ' + startPrct + '%, rgba(0,0,0,1) ' + startPrct + '% 100%)';
+
+                        var ghost = document.createElement('img');
+                        ghost.src = 'images/Pies/pie-100.png';
+                        ghost.classList.add('ghost-image');
+                        ghost.style.maskImage = mask;
+                        ghost.style.webkitMaskImage = mask;
+                        document.body.appendChild(ghost);
+                        event.interaction.ghost = ghost;
+                        
+                        // Provide visual feedback on the original pie
+                        $(target).siblings('.pie-chart-img').css('opacity', 0.5);
+                    }
+                }
+
                 if (event.interaction.ghost) {
                     const ghost = event.interaction.ghost;
                     // move the ghost element with the cursor
@@ -354,23 +443,13 @@ interact('.drag-handle')
             },
 
             start(event) {
+                // Failsafe: Remove any stuck ghosts from previous interrupted interactions
+                document.querySelectorAll('.ghost-image').forEach(el => el.remove());
+
                 var target = event.target;
-                var originalPie = $(target).siblings('.pie-chart-img')[0];
-
-                // Create a ghost element
-                const ghost = originalPie.cloneNode(true);
-                ghost.classList.add('ghost-image');
-                document.body.appendChild(ghost);
-
-                // Store the ghost on the interaction
-                event.interaction.ghost = ghost;
-
                 // Store source class on the handle itself for the drop event
                 var sourceClass = $(target).closest('.droppable').attr('eClass');
                 target.setAttribute('data-source-class', sourceClass);
-
-                // Provide visual feedback on the original pie
-                originalPie.style.opacity = 0.5;
             },
         }
     })
