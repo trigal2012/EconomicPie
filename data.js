@@ -67,9 +67,11 @@ const BONUS_QUESTION = {
 };
 
 const WEALTH_HISTORY = {
-    startYear: 1963,
-    endYear: 2016,
+    startYear: 1945,
+    endYear: 2026,    
+    totalWealth: 100,
     // Values for: Poorest, Lower-Mid, Middle, Upper-Mid, Richest
-    start: [1, 2, 6, 15, 76], 
-    end: [-1, 0, 2, 8, 90]
+    start: [1, 2, 6, 15, 76],
+    //negative values not handled
+    end: [0, 0, 1, 2, 97]
 };

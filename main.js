@@ -54,6 +54,11 @@ $(document).ready(function() {
         }
     });
 
+    // Global cleanup for stuck ghosts on interaction end
+    $(document).on('mouseup touchend touchcancel pointercancel', function() {
+        document.querySelectorAll('.ghost-image').forEach(el => el.remove());
+    });
+
     $('#slice-zone').on('click', function(e) {
         if (e.target === this) {
             closeOverlay('#slice-zone');
@@ -273,6 +278,7 @@ function handleBonusAnswer($btn, option) {
 }
 
 function showDidYouKnow() {
+    $('.history-bar').removeClass('draining');
     var layerName = '#score-overlay';
     var template = document.getElementById('template-did-you-know').content.cloneNode(true);
     
@@ -282,17 +288,26 @@ function showDidYouKnow() {
     
     // Create bars
     labels.forEach((label, i) => {
+        var startVal = WEALTH_HISTORY.start[i];
+
         var barContainer = $('<div class="bar-container"></div>');
+        var barWrapper = $('<div class="bar-wrapper"></div>');
         var bar = $('<div class="history-bar"></div>');
         var labelEl = $('<div class="bar-label small-text"></div>').text(label);
         
-        // Set initial height based on start data
-        bar.css('height', WEALTH_HISTORY.start[i] + '%');
+        // Set initial width based on start data
+         var displayWidth = Math.max(startVal, 1);
+        bar.css('width', displayWidth + '%');
+
         // Color logic (Richest gets gold, others get slate/gray)
-        if (i === 4) bar.css('background-color', 'var(--accent-color)');
+        if (i === 4) {
+             bar.css('background-color', 'var(--accent-color)');
+        }
+
         else bar.css('background-color', 'var(--primary-color)');
         
-        barContainer.append(bar).append(labelEl);
+        barWrapper.append(bar);
+        barContainer.append(labelEl).append(barWrapper);
         $chart.append(barContainer);
     });
 
@@ -305,7 +320,6 @@ function showDidYouKnow() {
     var startYear = WEALTH_HISTORY.startYear;
     var endYear = WEALTH_HISTORY.endYear;
     var duration = 4000;
-    var startTime = null;
 
     function animateHistory(timestamp) {
         if (!startTime) startTime = timestamp;
@@ -320,18 +334,22 @@ function showDidYouKnow() {
             var startVal = WEALTH_HISTORY.start[index];
             var endVal = WEALTH_HISTORY.end[index];
             var currentVal = startVal + (endVal - startVal) * progress;
-            // Ensure min height for visibility if value is near 0 or negative
-            var displayHeight = Math.max(currentVal, 1); 
-            $(this).css('height', displayHeight + '%');
+            // Ensure min width for visibility if value is near 0 or negative
+            var displayWidth = Math.max(currentVal, 1); 
+            $(this).css('width', displayWidth + '%');
         });
 
         if (progress < 1) {
             requestAnimationFrame(animateHistory);
+        } else {
+            //After the 
+            $('.history-bar:not(:last-child)').addClass('draining');
         }
     }
-    
+    $('.history-bar:not(:last-child)').removeClass('draining');
     requestAnimationFrame(animateHistory);
 }
+let startTime = null;
 
 function updateSlice() {
     updatePlateVisuals();
