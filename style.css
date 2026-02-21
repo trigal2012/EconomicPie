@@ -144,7 +144,6 @@
 	padding: 0;
 	margin-top: auto;
 	cursor: default;
-    -webkit-tap-highlight-color: transparent;
 }
 .droppable img
 {
@@ -164,11 +163,6 @@
 	cursor: grab;
 	touch-action: none;
 	outline: none;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none; /* Prevent context menu on long press */
-}
-.droppable:focus, .droppable:focus-visible, .drag-handle:focus {
-    outline: none;
 }
 .ghost-image {
 	position: absolute;
@@ -305,7 +299,7 @@ p
     .game-board {
         display: flex;
         flex-wrap: nowrap; /* Force single line */
-        justify-content: space-around; /* Spread out to fill width */
+        justify-content: space-around;
         align-items: flex-end;
         width: 100%;
         height: 100%;
@@ -313,7 +307,7 @@ p
     }
 
     .plate-slot {
-        flex: 0 0 19%; /* Use width percentage to fill screen (5 * 19% = 95%) */
+        flex: 0 0 19%;
         width: 19%;
         display: flex;
         flex-direction: column;
@@ -325,7 +319,7 @@ p
         height: auto;
         aspect-ratio: 1/1;
     }
-    
+
     /* Center overlays in landscape for better visibility */
     #score-overlay .overlay-card,
     #slice-zone .overlay-card {
@@ -335,6 +329,59 @@ p
         max-width: 700px; /* Allow wider modal in landscape */
         padding-bottom: 0;
     }
+
+    /* Reduce scrollable area height so header/footer fit on screen in landscape */
+    .scrollable-body {
+        max-height: 40vh;
+    }
+
+    /* Help Button as FAB in lower right */
+    #help-btn {
+        top: auto;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        padding: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+}
+
+/* History Chart Styles */
+#history-chart-container {
+    height: 200px;
+    width: 100%;
+    position: relative;
+}
+.history-chart {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    height: 100%;
+    width: 100%;
+    border-bottom: 2px solid #ccc;
+}
+.bar-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    width: 15%;
+}
+.history-bar {
+    width: 100%;
+    transition: height 0.1s linear;
+    border-radius: 5px 5px 0 0;
+}
+.bar-label {
+    margin-top: 5px;
+    font-size: 0.7rem;
+    text-align: center;
 }
 
 .action-buttons-container {

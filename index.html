@@ -137,6 +137,25 @@
     </div>
 </template>
 
+<template id="template-bonus-question">
+    <div class="card overlay-card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-start pt-2">
+                <div style="width: 30px;"></div> <!-- Spacer for centering -->
+                <h2 class="m-0 text-center flex-grow-1">Bonus Question</h2>
+                <div style="width: 30px;"></div>
+            </div>
+        </div>
+        <div class="card-body">
+            <h4 class="card-title text-center mb-4 question-text"></h4>
+            <div class="d-flex flex-wrap justify-content-center options-container">
+                <!-- Buttons generated via JS -->
+            </div>
+            <div class="alert mt-3 text-center feedback-alert" style="display:none; font-weight: bold;"></div>
+        </div>
+    </div>
+</template>
+
 <template id="template-stats-modal">
     <div class="card overlay-card stats-modal-card">
         <div class="card-header">
@@ -158,16 +177,18 @@
                 <li class="list-group-item"><b>The Lower Middle Class (Next 20%):</b> Own virtually nothing—their assets are almost entirely offset by their debts.</li>
                 <li class="list-group-item"><b>The Poorest 20%:</b> Have negative wealth. On average, they are $6,000 in debt, starting every day "underwater."</li>
             </ul>
+            <div class="text-center mt-3">
+                <small>Data Source: <a href="https://inequality.org/facts/income-inequality/" target="_blank">inequality.org</a></small>
+            </div>
             <div class="row justify-content-center mt-4">
                 <div class="col-12 text-center d-flex flex-wrap justify-content-center">
                     <button type="button" class="btn btn-info m-1 flex-grow-1 share-facts-btn"><i class="fas fa-copy"></i> Share Facts</button>
                     <button type="button" class="btn btn-info m-1 flex-grow-1 share-game-btn"><i class="fas fa-share-alt"></i> Share Game</button>
-                    <button type="button" class="btn btn-info m-1 flex-grow-1 learn-more-btn"><i class="fas fa-book-open"></i> Learn More</button>
                 </div>
             </div>
         </div>
         <div class="card-footer text-center bg-white border-0">
-            <button class="btn btn-primary mr-2 play-again-btn"><i class="fas fa-redo"></i> Play Again</button>
+            <button class="btn btn-primary mr-2 bonus-question-btn">Next: Bonus Question <i class="fas fa-arrow-right"></i></button>
         </div>
     </div>
 </template>
@@ -176,7 +197,7 @@
     <div class="plate-slot position-relative plate-wrapper">
         <p class="small-text label-text"></p>
         <button type="button" class="droppable">
-            <img class="pie-chart-img" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="plate" style="opacity: 0;" draggable="false">
+            <img class="pie-chart-img" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="plate" style="opacity: 0;">
             <div class="drag-handle"></div>
         </button>
         <p class="value-text">0</p>
@@ -200,6 +221,48 @@
             <p>You will be given a virtual pie that represents all the private wealth in America, totaling $100 trillion dollars.</p>
             <p>Your task is to distribute the wealth to five economic classes, each representing 20% of Americans, based on how much you think they possess.</p>
             <p>Drag from one plate to another to move wealth. When you are satisfied, click "Submit Answer".</p>
+            <p class="mt-3 text-center"><small>Data Source: <a href="https://inequality.org/facts/income-inequality/" target="_blank">inequality.org</a></small></p>
+        </div>
+    </div>
+</template>
+
+<template id="template-did-you-know">
+    <div class="card overlay-card stats-modal-card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-start pt-2">
+                <div style="width: 30px;"></div>
+                <h2 class="m-0 text-center flex-grow-1">Did You Know?</h2>
+                <div>
+                    <button type="button" class="close close-overlay-btn" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body scrollable-body">
+            <h5 class="text-center mb-3">Wealth Distribution (1963 - 2016)</h5>
+            <div id="history-chart-container" class="mb-4">
+                <div class="history-chart">
+                    <!-- Bars will be injected here -->
+                </div>
+                <div class="text-center font-weight-bold mt-2 year-display">1963</div>
+            </div>
+
+            <hr>
+            <h5 class="text-center mt-4">Recap</h5>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><b>Top 1%:</b> Own 32% of all wealth.</li>
+                <li class="list-group-item"><b>Richest 20%:</b> Control 90% of all wealth.</li>
+                <li class="list-group-item"><b>Bottom 80%:</b> Share just 10% of the wealth.</li>
+            </ul>
+            
+            <div class="text-center mt-3">
+                <small>Data Source: <a href="https://inequality.org/facts/income-inequality/" target="_blank">inequality.org</a></small>
+            </div>
+        </div>
+        <div class="card-footer text-center bg-white border-0">
+            <button class="btn btn-primary mr-2 play-again-btn"><i class="fas fa-redo"></i> Play Again</button>
+            <button class="btn btn-primary ml-2 home-btn"><i class="fas fa-home"></i> Home</button>
         </div>
     </div>
 </template>

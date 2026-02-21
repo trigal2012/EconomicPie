@@ -39,6 +39,10 @@ $(document).ready(function() {
     $('#score-overlay').on('click', '.start-game-btn', function() {
         closeOverlay('#score-overlay');
     });
+    // Bonus Question button
+    $('#score-overlay').on('click', '.bonus-question-btn', function() {
+        showBonusQuestion();
+    });
     
     // Click outside to close logic
     $('#score-overlay').on('click', function(e) {
@@ -219,12 +223,114 @@ function checkGuess() {
     } else {
         score = 50 + score;
     }
+    
     if (score == 100) {
         showAnswer(true);
     } else {
         displayScoreOverlay(false, score);
-        //alert('You guessed in-correct: ' + averageDifference);
     }
+}
+
+function showBonusQuestion() {
+    var layerName = '#score-overlay';
+    var template = document.getElementById('template-bonus-question').content.cloneNode(true);
+    
+    $(template).find('.question-text').text(BONUS_QUESTION.question);
+    var $container = $(template).find('.options-container');
+    
+    BONUS_QUESTION.options.forEach(opt => {
+        var btn = $('<button class="btn btn-primary m-2 flex-grow-1"></button>');
+        btn.text(opt.text);
+        btn.on('click', function() {
+            handleBonusAnswer($(this), opt);
+        });
+        $container.append(btn);
+    });
+
+    clearLayer(layerName);
+    $(layerName).append(template);
+    mainLayerPointerEvents(false);
+    showOverlay(layerName);
+}
+
+function handleBonusAnswer($btn, option) {
+    // Disable all buttons
+    $('.options-container button').prop('disabled', true);
+    
+    var $alert = $('.feedback-alert');
+    if (option.correct) {
+        $btn.removeClass('btn-primary').addClass('btn-success');
+        $alert.addClass('alert-success').text("Correct! " + BONUS_QUESTION.fact).fadeIn();
+    } else {
+        $btn.removeClass('btn-primary').addClass('btn-danger');
+        $alert.addClass('alert-danger').text("Incorrect. " + BONUS_QUESTION.fact).fadeIn();
+    }
+
+    // Wait then proceed to Did You Know
+    setTimeout(function() {
+        showDidYouKnow();
+    }, 4000);
+}
+
+function showDidYouKnow() {
+    var layerName = '#score-overlay';
+    var template = document.getElementById('template-did-you-know').content.cloneNode(true);
+    
+    // Setup Graph
+    var $chart = $(template).find('.history-chart');
+    var labels = ["Poorest", "Lower-Mid", "Middle", "Upper-Mid", "Richest"];
+    
+    // Create bars
+    labels.forEach((label, i) => {
+        var barContainer = $('<div class="bar-container"></div>');
+        var bar = $('<div class="history-bar"></div>');
+        var labelEl = $('<div class="bar-label small-text"></div>').text(label);
+        
+        // Set initial height based on start data
+        bar.css('height', WEALTH_HISTORY.start[i] + '%');
+        // Color logic (Richest gets gold, others get slate/gray)
+        if (i === 4) bar.css('background-color', 'var(--accent-color)');
+        else bar.css('background-color', 'var(--primary-color)');
+        
+        barContainer.append(bar).append(labelEl);
+        $chart.append(barContainer);
+    });
+
+    clearLayer(layerName);
+    $(layerName).append(template);
+    mainLayerPointerEvents(false);
+    showOverlay(layerName);
+
+    // Start Animation
+    var startYear = WEALTH_HISTORY.startYear;
+    var endYear = WEALTH_HISTORY.endYear;
+    var duration = 4000;
+    var startTime = null;
+
+    function animateHistory(timestamp) {
+        if (!startTime) startTime = timestamp;
+        var progress = Math.min((timestamp - startTime) / duration, 1);
+        
+        // Update Year
+        var currentYear = Math.floor(startYear + (endYear - startYear) * progress);
+        $('.year-display').text(currentYear);
+
+        // Update Bars
+        $('.history-bar').each(function(index) {
+            var startVal = WEALTH_HISTORY.start[index];
+            var endVal = WEALTH_HISTORY.end[index];
+            var currentVal = startVal + (endVal - startVal) * progress;
+            // Ensure min height for visibility if value is near 0 or negative
+            var displayHeight = Math.max(currentVal, 1); 
+            $(this).css('height', displayHeight + '%');
+        });
+
+        if (progress < 1) {
+            requestAnimationFrame(animateHistory);
+        }
+    }
+    
+    requestAnimationFrame(animateHistory);
 }
 
 function updateSlice() {

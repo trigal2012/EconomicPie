@@ -54,3 +54,22 @@ const INITIAL_PIECES = [
     { "id": 16, "value": 10, "img": "images/slices/slice-6.png" },
     { "id": 17, "value": 10, "img": "images/slices/slice-7.png" }
 ];
+
+const BONUS_QUESTION = {
+    question: "How much wealth does the top 1% own?",
+    options: [
+        { text: "10%", correct: false },
+        { text: "20%", correct: false },
+        { text: "32%", correct: true },
+        { text: "50%", correct: false }
+    ],
+    fact: "The top 1% of households own roughly 32% of all private wealth in the United States."
+};
+
+const WEALTH_HISTORY = {
+    startYear: 1963,
+    endYear: 2016,
+    // Values for: Poorest, Lower-Mid, Middle, Upper-Mid, Richest
+    start: [1, 2, 6, 15, 76], 
+    end: [-1, 0, 2, 8, 90]
+};
