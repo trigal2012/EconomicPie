@@ -10,7 +10,7 @@ $(document).ready(function() {
     // Show Start Screen immediately
     showStartScreen();
 
-    // Score Overlay Delegation
+    // Overlay Delegation
     $('#score-overlay').on('click', '.share-btn', function() { shareGame('#score-overlay'); });
     $('#score-overlay').on('click', '.learn-more-btn', function() { window.open('https://inequality.org/facts/income-inequality/', '_blank'); });
     $('#score-overlay').on('click', '.close-overlay-btn', function() { closeOverlay('#score-overlay'); });
@@ -32,7 +32,7 @@ $(document).ready(function() {
     $('#score-overlay').on('click', '.share-facts-btn', shareFacts);
     $('#score-overlay').on('click', '.share-game-btn', function() { shareGame('#score-overlay'); });
     $('#slice-zone').on('click', '.cancel-move-btn', function() { 
-        closeOverlay('#slice-zone'); 
+        closeOverlay('#slice-zone');
         updatePlateVisuals(); // Restore opacity if cancelled
     });
     // Start Game button
@@ -86,6 +86,7 @@ $(document).ready(function() {
         document.querySelectorAll('.ghost-image').forEach(el => el.remove());
     });
 
+
     // Aggressive cleanup on new touch start to prevent stuck ghosts
     $(document).on('touchstart mousedown', function(e) {
         document.querySelectorAll('.ghost-image').forEach(el => el.remove());
@@ -94,6 +95,7 @@ $(document).ready(function() {
 
 function initializeBoard() {
     var container = $('#plate-container');
+
     container.empty(); // Clear any existing plates
     var template = document.getElementById('template-plate-item').content;
 
@@ -255,6 +257,7 @@ function showBonusQuestion() {
     clearLayer(layerName);
     $(layerName).append(template);
     mainLayerPointerEvents(false);
+    renderWealthHistoryChart();
     showOverlay(layerName);
 }
 
@@ -354,6 +357,52 @@ let startTime = null;
 function updateSlice() {
     updatePlateVisuals();
 }
+
+function renderWealthHistoryChart() {
+    const svg = d3.select("#wealth-history-svg");
+    const data = WEALTH_HISTORY;
+    const labels = ["Poorest", "Lower-Mid", "Middle", "Upper-Mid", "Richest"];
+
+    // Define scales
+    const xScale = d3.scaleLinear()
+        .domain([d3.min(data, d => d.startYear), d3.max(data, d => d.endYear)])
+        .range([50, 500]); // Adjust range for margins
+
+    const yScale = d3.scaleLinear()
+        .domain([0, 100]) // Wealth percentages
+        .range([180, 20]); // Adjust range for margins
+
+    // Line generator
+    const line = d3.line()
+        .x(d => xScale(d.year))
+        .y(d => yScale(d.poorest)); // Start with 'poorest' for now
+
+    // Create a line for each class
+    labels.forEach((className, index) => {
+        // Construct the key for data access (e.g. 'poorest', 'richest')
+        const key = className.toLowerCase().replace(' ', '');
+
+        // Update the line generator to use the correct yAccessor
+        line.y(d => yScale(d[key]));
+
+        // Draw the line
+        svg.append("path")
+            .data([data]) // Pass the data as an array of a single array
+            .attr("class", "wealth-line")
+            .attr("d", line)
+            .attr("stroke", (index === 0) ? "blue" : "red") // Example colours
+            .attr("stroke-width", 2)
+            .attr("fill", "none");
+    });
+
+    // Add X axis
+    svg.append("g")
+        .attr("transform", "translate(0,180)")
+        .call(d3.axisBottom(xScale).ticks(5));
+}
+
+
+
 
 function updatePlateVisuals() {
     economicClasses.forEach((ec, i) => {

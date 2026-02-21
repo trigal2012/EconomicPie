@@ -5,11 +5,11 @@ Welcome to the Economic Pie Game! This is an interactive web-based game designed
 
 ## Summary
 
-The game presents players with a virtual pie representing $100 trillion of private wealth in America. The game begins with this wealth distributed evenly among five economic classes (20% each). The objective is to redistribute this wealth to reflect what the player believes is the actual distribution in the United States, from the "Poorest 20%" to the "Richest 20%".
+The game, called Economic Pie, challenges players to redistribute $100 trillion of private wealth, initially divided equally among five economic classes, to reflect their understanding of wealth distribution in the United States.
 
-Players drag from one plate to another to move wealth in specific increments. Once satisfied, players submit their guess to see how it compares to reality. The game reveals the actual distribution through an animation and provides detailed statistics.
+Players redistribute wealth by dragging from one plate to another, selecting amounts to move. Once satisfied with their distribution, players submit their guess and receive a score indicating their accuracy, followed by an opportunity to test their knowledge with a bonus question.
 
-## Game Features & User Actions
+## Key Features and Gameplay
 
 This application supports the following interactions:
 
@@ -25,8 +25,10 @@ This application supports the following interactions:
     *   **Share:** Users can share the game link or the specific wealth statistics.
     *   **Learn More:** Directs users to external resources.
 *   **Responsive Design:** Optimized layouts for Mobile Portrait, Mobile Landscape, and Desktop.
+*   **Bonus Question:** A challenge after submitting the distribution for extra engagement.
+*   **Wealth History Chart:** Interactive chart visualizing wealth distribution trends over the past decades.
 
-## How to Run Locally
+## How to Run the Game Locally
 
 To run this project on your local machine, you don't need any complex build steps. You just need a modern web browser.
 
@@ -43,16 +45,17 @@ To run this project on your local machine, you don't need any complex build step
 
 3.  **Open `index.html` in your web browser.**
     You can typically do this by double-clicking the `index.html` file, or right-clicking and selecting "Open with" your favorite browser.
+    You can access the Economic Pie game and start playing.
 
     **Using VS Code Live Server:**
     If you are using Visual Studio Code, you can run the project with the "Live Server" extension:
     1. Install the **Live Server** extension.
     2. Right-click on `index.html` in the file explorer.
     3. Select **Open with Live Server**.
-
 That's it! The game should now be running in your browser.
 
 ## Live Version
+
 
 You can play the live version of the game here:
 
@@ -85,7 +88,7 @@ We welcome contributions to the Economic Pie Game! Whether you're a developer, a
 
 To contribute:
 
-1.  **Fork the repository.**
+1. **Fork the repository.**
 2.  **Create a new branch** for your feature or bug fix: `git checkout -b feature-name`.
 3.  **Make your changes.**
 4.  **Commit your changes:** `git commit -m 'Add some feature'`.
@@ -121,7 +124,6 @@ Use this checklist to verify functionality before releasing updates. Copy this i
 ### 2. Functional Testing
 - [ ] **F01 Drag & Drop:** Drag from Plate A to Plate B. Ghost image follows cursor.
 - [ ] **F02 Move Menu:** Drop on Plate B. Menu shows valid options (2.5, 5, 10, All).
-- [ ] **F03 Visuals:** Pie charts update to reflect new values (e.g., 17.5 vs 22.5).
 - [ ] **F04 Double Tap:** Double tap a plate. It becomes 100 ($100T), others become 0.
 - [ ] **F05 Submit:** Button enables after first move. Click Submit.
 - [ ] **F06 Win State:** Distribute 0, 0, 5, 5, 90. Verify "Congrats!" overlay.
@@ -131,9 +133,9 @@ Use this checklist to verify functionality before releasing updates. Copy this i
 - [ ] **F10 Remove Slice:** Click slice in overlay. Slice returns to pile. Plate value decreases.
 
 ### 3. Negative Testing
-- [ ] **N01 Drop in Void:** Drag plate handle and drop on background. Ghost disappears, no change.
+- [ ] **N01 Drop in Void:** Drag plate handle and drop on background. Ghost disappears, and has no change.
 - [ ] **N02 Drop on Self:** Drag plate handle and drop on same plate. No change.
-- [ ] **N03 Cancel Move:** Drag, Drop, then click Cancel in menu. No change.
+- [ ] **N03 Cancel Move:** Drag, Drop, then click Cancel in menu, and it will have no change.
 
 ## Operational Details (For Maintainers)
 
