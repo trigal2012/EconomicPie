@@ -265,19 +265,22 @@ function handleBonusAnswer($btn, option) {
     // Disable all buttons
     $('.options-container button').prop('disabled', true);
     
-    var $alert = $('.feedback-alert');
-    if (option.correct) {
-        $btn.removeClass('btn-primary').addClass('btn-success');
-        $alert.addClass('alert-success').text("Correct! " + BONUS_QUESTION.fact).fadeIn();
-    } else {
-        $btn.removeClass('btn-primary').addClass('btn-danger');
-        $alert.addClass('alert-danger').text("Incorrect. " + BONUS_QUESTION.fact).fadeIn();
-    }
+    setTimeout(function() {
+        var $alert = $('.feedback-alert');
+            if (option.correct) {
+                $btn.removeClass('btn-primary').addClass('btn-success');
+                $alert.addClass('alert-success').text("Correct! " + BONUS_QUESTION.fact).fadeIn();
+            } else {
+                $btn.removeClass('btn-primary').addClass('btn-danger');
+                $alert.addClass('alert-danger').text("Incorrect. " + BONUS_QUESTION.fact).fadeIn();
+            }
+        }, 800 );
+    
 
     // Wait then proceed to Did You Know
     setTimeout(function() {
         showDidYouKnow();
-    }, 4000);
+    }, 3500);
 }
 
 function showDidYouKnow() {
