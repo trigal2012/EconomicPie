@@ -11,6 +11,121 @@ const CLASS_COLORS = {
     "poorest": "#e74c3c"              // Red
 };
 
+// Centralized Audio Manager
+const AudioManager = {
+    enabled: true,
+    context: null,
+
+    init() {
+        if (!this.context) {
+            this.context = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    },
+
+    play(type) {
+        if (!this.enabled) return;
+        this.init();
+        if (this.context.state === 'suspended') this.context.resume();
+
+        const osc = this.context.createOscillator();
+        const gain = this.context.createGain();
+        osc.connect(gain);
+        gain.connect(this.context.destination);
+
+        const now = this.context.currentTime;
+
+        switch (type) {
+            case 'click': // "Fintech Tap" - Slightly lower for less ear fatigue
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1000, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.04);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+                osc.start(now);
+                osc.stop(now + 0.04);
+                break;
+            case 'move': // "Soft Pluck" - Sine instead of triangle for smoothness
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(150, now + 0.1);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+                break;
+            case 'success': // "Premium Bank Ping" - Clean, sparkling arpeggio
+                this.playTone(880, 0.05, now);      // A5
+                this.playTone(1108.73, 0.05, now + 0.05); // C#6
+                this.playTone(1318.51, 0.2, now + 0.1);  // E6
+                break;
+            case 'fail': // "Empty Wallet Thud" - Muted and low-fi
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.exponentialRampToValueAtTime(40, now + 0.2);
+                
+                // Add a "noise" component for a papery rustle effect
+                const noise = this.context.createBufferSource();
+                const bufferSize = this.context.sampleRate * 0.2;
+                const buffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
+                noise.buffer = buffer;
+                
+                const noiseGain = this.context.createGain();
+                noiseGain.gain.setValueAtTime(0.05, now);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                
+                noise.connect(noiseGain);
+                noiseGain.connect(this.context.destination);
+                
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+                noise.start(now);
+                noise.stop(now + 0.2);
+                break;
+            case 'reveal': // "Granular Shimmer" - Short pulse to prevent buildup
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.exponentialRampToValueAtTime(1500, now + 0.03);
+                gain.gain.setValueAtTime(0.02, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+                break;
+            case 'tick': // A high-end, tiny "clock" tick for the history years
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1800, now);
+                gain.gain.setValueAtTime(0.03, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.02);
+                osc.start(now);
+                osc.stop(now + 0.02);
+                break;
+        }
+    },
+
+    playTone(freq, dur, time) {
+        const osc = this.context.createOscillator();
+        const gain = this.context.createGain();
+        osc.connect(gain);
+        gain.connect(this.context.destination);
+        osc.frequency.setValueAtTime(freq, time);
+        gain.gain.setValueAtTime(0.1, time);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + dur);
+        osc.start(time);
+        osc.stop(time + dur);
+    },
+
+    unlock() {
+        this.init();
+        // Chrome/Safari requirement: resume context on user gesture
+        if (this.context.state === 'suspended') {
+            this.context.resume();
+        }
+    }
+};
+
 // Reactive State Management: Wrap economicClasses in a Proxy
 // This automatically triggers updatePlateVisuals whenever guessedValue changes
 const state = economicClasses.map(ec => new Proxy(ec, {
@@ -59,6 +174,7 @@ $(document).ready(function() {
     });
     // Start Game button
     $('#score-overlay').on('click', '.start-game-btn', function() {
+        AudioManager.unlock(); // Prime the Web Audio Context
         closeOverlay('#score-overlay');
     });
     // Bonus Question button
@@ -144,6 +260,7 @@ function mainLayerPointerEvents(state){
 
 function showOverlay(layerName) {
     const $overlay = $(layerName);
+    AudioManager.play('click');
     // Cancel any pending cleanup transitions
     $overlay.off('transitionend');
     $overlay.css({
@@ -183,6 +300,12 @@ function displayScoreOverlay(correct, score = 100) {
 
     // If guessed correctly...
     if (correct) {
+        confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 }
+        });
+
         // Set header of overlay to Congrats!
         cardHeader = 'Congrats!'
 
@@ -260,6 +383,7 @@ function showBonusQuestion() {
         var btn = $('<button class="btn btn-primary m-1 flex-grow-1"></button>');
         btn.text(opt.text);
         btn.on('click', function() {
+            AudioManager.play('click');
             handleBonusAnswer($(this), opt);
         });
         $container.append(btn);
@@ -280,9 +404,11 @@ function handleBonusAnswer($btn, option) {
             if (option.correct) {
                 $btn.removeClass('btn-primary').addClass('btn-success');
                 $alert.addClass('alert-success').text("Correct! " + BONUS_QUESTION.fact).fadeIn();
+                AudioManager.play('success');
             } else {
                 $btn.removeClass('btn-primary').addClass('btn-danger');
                 $alert.addClass('alert-danger').text("Incorrect. " + BONUS_QUESTION.fact).fadeIn();
+                AudioManager.play('fail');
             }
             
             // Scroll to the bottom of the card body so the alert is visible
@@ -337,6 +463,7 @@ function showDidYouKnow() {
     const endYear = WEALTH_HISTORY[WEALTH_HISTORY.length - 1].year;
     var duration = 4000;
     let animStartTime = null;
+    let lastTickYear = startYear;
 
     function animateHistory(timestamp) {
         if (!animStartTime) animStartTime = timestamp;
@@ -353,6 +480,12 @@ function showDidYouKnow() {
         // Update Year
         var currentYear = Math.floor(p1.year + (p2.year - p1.year) * segmentT);
         $('.year-display').text(progress === 1 ? p2.year : currentYear);
+
+        // Play a light tick whenever the year increments
+        if (currentYear !== lastTickYear) {
+            AudioManager.play('tick');
+            lastTickYear = currentYear;
+        }
 
         // Update Bars
         $('.history-bar').each(function(index) {
@@ -455,6 +588,7 @@ function showMoveOptions(sourceClass, targetClass) {
         btn.html(icon + label);
         btn.on('click', function() {
             var amount = (opt === 'All') ? sourceValue : opt;
+            AudioManager.play('success');
             executeMove(sourceClass, targetClass, amount);
         });
         $list.append(btn);
@@ -467,6 +601,10 @@ function showMoveOptions(sourceClass, targetClass) {
 }
 
 function executeMove(sourceClass, targetClass, amount) {
+    AudioManager.play('move');
+    showFloatingValue(sourceClass, `-$${amount}T`, 'val-neg');
+    showFloatingValue(targetClass, `+$${amount}T`, 'val-pos');
+
     // Changing the state proxy automatically triggers updatePlateVisuals
     state[sourceClass].guessedValue = Math.max(0, parseFloat((state[sourceClass].guessedValue - amount).toFixed(1)));
     state[targetClass].guessedValue = parseFloat((state[targetClass].guessedValue + amount).toFixed(1));
@@ -474,13 +612,17 @@ function executeMove(sourceClass, targetClass, amount) {
     closeOverlay('#slice-zone');
     $('#submit-btn').prop('disabled', false).addClass('btn-success');
     $('#reset-btn').prop('disabled', false).addClass('btn-secondary');
-    // Haptic feedback for a successful move
-    if (navigator.vibrate) {
-        navigator.vibrate(50); // Vibrate for 50ms
-    }
+}
+
+function showFloatingValue(targetIndex, text, className) {
+    const $target = $('.plate-wrapper').eq(targetIndex);
+    const $float = $(`<div class="floating-value ${className}">${text}</div>`);
+    $target.append($float);
+    setTimeout(() => $float.remove(), 1000);
 }
 
 function moveAllWealthTo(targetClass) {
+    AudioManager.play('reveal'); // Use the swell for big moves to feel more impactful
     // Batch update raw data
     economicClasses.forEach((ec, index) => {
         if (index === targetClass) {
@@ -603,6 +745,8 @@ interact('.drag-handle')
                 // Store source class on the handle itself for the drop event
                 var sourceClass = $(target).closest('.droppable').attr('eClass');
                 target.setAttribute('data-source-class', sourceClass);
+                
+                AudioManager.play('click'); 
             },
         }
     })
@@ -621,6 +765,7 @@ function showAnswer(isCorrect = false) {
     $('.droppable').css('pointer-events', 'none');
 
     if (isCorrect) {
+        AudioManager.play('success');
         // If correct, skip the animation. Just ensure the final state is rendered.
         state.forEach((ec, index) => {
             // Use raw object to update without triggering individual Proxy refreshes
@@ -646,6 +791,7 @@ function showAnswer(isCorrect = false) {
     // 1. Set up animation parameters
     const duration = 3000; // 4 seconds for the animation
     let startTime = null;
+    let lastTickProgress = 0;
     
     // Store initial and target values
     const animationData = state.map(ec => ({
@@ -658,8 +804,17 @@ function showAnswer(isCorrect = false) {
 
     // 2. Animation Loop
     function animate(timestamp) {
-        if (!startTime) startTime = timestamp;
+        if (!startTime) {
+            startTime = timestamp;
+        }
         const progress = Math.min((timestamp - startTime) / duration, 1);
+
+        // Use the same granular 'tick' sound from the bar chart for consistency
+        if (Math.floor(progress * 60) !== Math.floor(lastTickProgress * 60)) {
+            AudioManager.play('tick');
+            lastTickProgress = progress;
+        }
+
         const easedProgress = easeOutQuad(progress);
 
         if (progress < 1) {
@@ -695,6 +850,7 @@ function showAnswer(isCorrect = false) {
 
 function resetGame() {
     if (bonusTimer) clearTimeout(bonusTimer);
+    AudioManager.play('click');
 
     // Tactile feedback for reset
     if (navigator.vibrate) {
