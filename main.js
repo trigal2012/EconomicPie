@@ -543,7 +543,7 @@ function updatePlateVisuals() {
         if (val > 0) {
             $droppable.addClass('has-slices');
             // Use full pie and mask it to the specific value
-            $img.attr('src', 'images/Pies/pie-100.png').css('opacity', 1);
+            $img.attr('src', 'images/pie-full.png').css('opacity', 1);
             var mask = '';
             if (endPrct <= 100) {
                 mask = 'conic-gradient(rgba(0,0,0,0) 0% ' + startPrct + '%, rgba(0,0,0,1) ' + startPrct + '% ' + endPrct + '%, rgba(0,0,0,0) ' + endPrct + '% 100%)';
@@ -707,7 +707,7 @@ interact('.drag-handle')
                             : 'conic-gradient(rgba(0,0,0,1) 0% ' + (endPrct - 100) + '%, rgba(0,0,0,0) ' + (endPrct - 100) + '% ' + startPrct + '%, rgba(0,0,0,1) ' + startPrct + '% 100%)';
 
                         var ghost = document.createElement('img');
-                        ghost.src = 'images/Pies/pie-100.png';
+                        ghost.src = 'images/pie-full.png';
                         ghost.classList.add('ghost-image');
                         ghost.style.maskImage = mask;
                         ghost.style.webkitMaskImage = mask;
