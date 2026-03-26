@@ -1,6 +1,15 @@
 // Global variable for double-tap timing, shared between click and drag handlers
 var lastTap = 0;
 
+// Distinct colors for each economic class
+const CLASS_COLORS = {
+    "richest": "var(--accent-color)", // Gold
+    "uppermid": "#2c3e50",            // Dark Slate
+    "middle": "#2980b9",              // Blue
+    "lowermid": "#27ae60",            // Green
+    "poorest": "#e74c3c"              // Red
+};
+
 // Add Event Listeners
 $(document).ready(function() {
     initializeBoard();
@@ -125,6 +134,7 @@ function mainLayerPointerEvents(state){
 }
 
 function showOverlay(layerName){
+    if (closeOverlayTimer) clearTimeout(closeOverlayTimer);
     $(layerName).css({
         'opacity': '1',
         'pointer-events': 'auto'
@@ -220,20 +230,13 @@ function checkGuess() {
     const sumOfDifferences = economicClasses.reduce((sum, ec) => {
         return sum + Math.abs(ec.value - ec.guessedValue);
     }, 0);
-    // Calculate the maximum possible sum of absolute differences
-    const maxSumOfDifferences = 100;
-    // Calculate the score
-    var score = ((maxSumOfDifferences - sumOfDifferences) / maxSumOfDifferences) * 50;
 
-    if (score > 0) {
-        score += 50;
-    } else {
-        score = 50 + score;
-    }
-    
-    if (score == 100) {
+    // Use an epsilon for floating point comparison
+    if (sumOfDifferences < 0.1) {
         showAnswer(true);
     } else {
+        const maxSumOfDifferences = 200; // Max theoretical diff is 200
+        let score = ((maxSumOfDifferences - sumOfDifferences) / maxSumOfDifferences) * 100;
         displayScoreOverlay(false, score);
     }
 }
@@ -246,7 +249,7 @@ function showBonusQuestion() {
     var $container = $(template).find('.options-container');
     
     BONUS_QUESTION.options.forEach(opt => {
-        var btn = $('<button class="btn btn-primary m-2 flex-grow-1"></button>');
+        var btn = $('<button class="btn btn-primary m-1 flex-grow-1"></button>');
         btn.text(opt.text);
         btn.on('click', function() {
             handleBonusAnswer($(this), opt);
@@ -257,7 +260,6 @@ function showBonusQuestion() {
     clearLayer(layerName);
     $(layerName).append(template);
     mainLayerPointerEvents(false);
-    renderWealthHistoryChart();
     showOverlay(layerName);
 }
 
@@ -273,6 +275,12 @@ function handleBonusAnswer($btn, option) {
             } else {
                 $btn.removeClass('btn-primary').addClass('btn-danger');
                 $alert.addClass('alert-danger').text("Incorrect. " + BONUS_QUESTION.fact).fadeIn();
+            }
+            
+            // Scroll to the bottom of the card body so the alert is visible
+            var $scrollBody = $('.scrollable-body');
+            if ($scrollBody.length) {
+                $scrollBody.animate({ scrollTop: $scrollBody[0].scrollHeight }, 500);
             }
         }, 800 );
     
@@ -291,26 +299,19 @@ function showDidYouKnow() {
     // Setup Graph
     var $chart = $(template).find('.history-chart');
     var labels = ["Poorest", "Lower-Mid", "Middle", "Upper-Mid", "Richest"];
+    const keys = ["poorest", "lowermid", "middle", "uppermid", "richest"];
     
-    // Create bars
-    labels.forEach((label, i) => {
-        var startVal = WEALTH_HISTORY.start[i];
-
+    labels.forEach((label, index) => {
+        const startVal = WEALTH_HISTORY[0][keys[index]];
         var barContainer = $('<div class="bar-container"></div>');
         var barWrapper = $('<div class="bar-wrapper"></div>');
         var bar = $('<div class="history-bar"></div>');
         var labelEl = $('<div class="bar-label small-text"></div>').text(label);
         
-        // Set initial width based on start data
-         var displayWidth = Math.max(startVal, 1);
+        var displayWidth = Math.max(startVal, 1);
         bar.css('width', displayWidth + '%');
 
-        // Color logic (Richest gets gold, others get slate/gray)
-        if (i === 4) {
-             bar.css('background-color', 'var(--accent-color)');
-        }
-
-        else bar.css('background-color', 'var(--primary-color)');
+        bar.css('background-color', CLASS_COLORS[keys[index]]);
         
         barWrapper.append(bar);
         barContainer.append(labelEl).append(barWrapper);
@@ -323,32 +324,38 @@ function showDidYouKnow() {
     showOverlay(layerName);
 
     // Start Animation
-    var startYear = WEALTH_HISTORY.startYear;
-    var endYear = WEALTH_HISTORY.endYear;
+    const startYear = WEALTH_HISTORY[0].year;
+    const endYear = WEALTH_HISTORY[WEALTH_HISTORY.length - 1].year;
     var duration = 4000;
+    let animStartTime = null;
 
     function animateHistory(timestamp) {
-        if (!startTime) startTime = timestamp;
-        var progress = Math.min((timestamp - startTime) / duration, 1);
-        
+        if (!animStartTime) animStartTime = timestamp;
+        var progress = Math.min((timestamp - animStartTime) / duration, 1);
+
+        const totalSegments = WEALTH_HISTORY.length - 1;
+        const scaledProgress = progress * totalSegments;
+        const segmentIndex = Math.min(Math.floor(scaledProgress), totalSegments - 1);
+        const segmentT = scaledProgress - segmentIndex;
+
+        const p1 = WEALTH_HISTORY[segmentIndex];
+        const p2 = WEALTH_HISTORY[segmentIndex + 1];
+
         // Update Year
-        var currentYear = Math.floor(startYear + (endYear - startYear) * progress);
-        $('.year-display').text(currentYear);
+        var currentYear = Math.floor(p1.year + (p2.year - p1.year) * segmentT);
+        $('.year-display').text(progress === 1 ? p2.year : currentYear);
 
         // Update Bars
         $('.history-bar').each(function(index) {
-            var startVal = WEALTH_HISTORY.start[index];
-            var endVal = WEALTH_HISTORY.end[index];
-            var currentVal = startVal + (endVal - startVal) * progress;
-            // Ensure min width for visibility if value is near 0 or negative
-            var displayWidth = Math.max(currentVal, 1); 
+            const key = keys[index];
+            const currentVal = p1[key] + (p2[key] - p1[key]) * segmentT;
+            const displayWidth = Math.max(currentVal, 1); 
             $(this).css('width', displayWidth + '%');
         });
 
         if (progress < 1) {
             requestAnimationFrame(animateHistory);
         } else {
-            //After the 
             $('.history-bar:not(:last-child)').addClass('draining');
         }
     }
@@ -361,48 +368,6 @@ function updateSlice() {
     updatePlateVisuals();
 }
 
-function renderWealthHistoryChart() {
-    const svg = d3.select("#wealth-history-svg");
-    const data = WEALTH_HISTORY;
-    const labels = ["Poorest", "Lower-Mid", "Middle", "Upper-Mid", "Richest"];
-
-    // Define scales
-    const xScale = d3.scaleLinear()
-        .domain([d3.min(data, d => d.startYear), d3.max(data, d => d.endYear)])
-        .range([50, 500]); // Adjust range for margins
-
-    const yScale = d3.scaleLinear()
-        .domain([0, 100]) // Wealth percentages
-        .range([180, 20]); // Adjust range for margins
-
-    // Line generator
-    const line = d3.line()
-        .x(d => xScale(d.year))
-        .y(d => yScale(d.poorest)); // Start with 'poorest' for now
-
-    // Create a line for each class
-    labels.forEach((className, index) => {
-        // Construct the key for data access (e.g. 'poorest', 'richest')
-        const key = className.toLowerCase().replace(' ', '');
-
-        // Update the line generator to use the correct yAccessor
-        line.y(d => yScale(d[key]));
-
-        // Draw the line
-        svg.append("path")
-            .data([data]) // Pass the data as an array of a single array
-            .attr("class", "wealth-line")
-            .attr("d", line)
-            .attr("stroke", (index === 0) ? "blue" : "red") // Example colours
-            .attr("stroke-width", 2)
-            .attr("fill", "none");
-    });
-
-    // Add X axis
-    svg.append("g")
-        .attr("transform", "translate(0,180)")
-        .call(d3.axisBottom(xScale).ticks(5));
-}
 
 
 

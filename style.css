@@ -358,11 +358,6 @@ p
     }
 }
 
-/* History Chart Styles */
-#history-chart-container {
-    width: 100%;
-    position: relative;
-}
 .history-chart {
     display: flex;
     flex-direction: column;

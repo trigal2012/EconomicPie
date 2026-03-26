@@ -66,12 +66,15 @@ const BONUS_QUESTION = {
     fact: "The top 1% of households own roughly 32% of all private wealth in the United States."
 };
 
-const WEALTH_HISTORY = {
-    startYear: 1945,
-    endYear: 2026,    
-    totalWealth: 100,
-    // Values for: Poorest, Lower-Mid, Middle, Upper-Mid, Richest
-    start: [1, 2, 6, 15, 76],
-    //negative values not handled
-    end: [0, 0, 1, 2, 97]
-};
+const WEALTH_HISTORY = [
+    { year: 1945, poorest: 1, lowermid: 2, middle: 6,  uppermid: 15, richest: 76 }, // Post-War
+    { year: 1963, poorest: 0, lowermid: 3, middle: 8,  uppermid: 15, richest: 74 }, // Post-War stability
+    { year: 1973, poorest: 0, lowermid: 3, middle: 9,  uppermid: 18, richest: 70 }, // Historical peak of middle class
+    { year: 1983, poorest: 0, lowermid: 2, middle: 5,  uppermid: 13, richest: 80 }, // Shift towards concentration
+    { year: 1992, poorest: 0, lowermid: 1, middle: 5,  uppermid: 11, richest: 83 },
+    { year: 2001, poorest: 0, lowermid: 1, middle: 4,  uppermid: 11, richest: 84 }, // Tech bubble peak
+    { year: 2007, poorest: 0, lowermid: 1, middle: 3.5,uppermid: 10.5,richest: 85 }, // Pre-GFC
+    { year: 2013, poorest: 0, lowermid: 0, middle: 3,  uppermid: 9.5, richest: 87.5}, // Recovery gap
+    { year: 2019, poorest: 0, lowermid: 0, middle: 3,  uppermid: 8,   richest: 89 }, // Pre-Pandemic
+    { year: 2026, poorest: 0, lowermid: 0, middle: 2.5,uppermid: 7.5, richest: 90 }  // Game Answer State
+];
