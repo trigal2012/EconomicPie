@@ -152,7 +152,7 @@ $(document).ready(function() {
 
     // Overlay Delegation
     $('#score-overlay').on('click', '.share-btn', function() { shareGame('#score-overlay'); });
-    $('#score-overlay').on('click', '.learn-more-btn', function() { window.open('https://inequality.org/facts/income-inequality/', '_blank'); });
+    $('#score-overlay').on('click', '.learn-more-btn', function() { window.open('https://inequality.org/facts/wealth-inequality/', '_blank'); });
     $('#score-overlay').on('click', '.close-overlay-btn', function() { closeOverlay('#score-overlay'); });
     $('#score-overlay').on('click', '.try-again-btn', function() { resetGame(); });
     $('#score-overlay').on('click', '.show-answer-btn', function() { showAnswer(); });
