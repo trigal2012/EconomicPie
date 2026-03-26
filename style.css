@@ -61,10 +61,12 @@
 	transition: opacity 1.5s ease;
     overflow-y: auto; /* Enable scrolling for landscape/small screens */
     -webkit-overflow-scrolling: touch;
+    padding: 20px 0;
 }
 
 /* Default centering for overlays using margin */
 #overlay-layer .overlay-card,
+#score-overlay .overlay-card,
 #slice-zone .overlay-card {
     margin: auto;
 }
@@ -72,13 +74,6 @@
 #score-overlay
 {
     /* No specific alignment needed here, handled by child margin */
-}
-
-#score-overlay .overlay-card {
-    margin-top: auto; /* Push to bottom */
-    margin-bottom: 5vh; /* Keep the padding */
-    margin-left: auto;
-    margin-right: auto;
 }
 
 #slice-zone

@@ -153,7 +153,7 @@ $(document).ready(function() {
     // Overlay Delegation
     $('#score-overlay').on('click', '.share-btn', function() { shareGame('#score-overlay'); });
     $('#score-overlay').on('click', '.learn-more-btn', function() { window.open('https://inequality.org/facts/wealth-inequality/', '_blank'); });
-    $('#score-overlay').on('click', '.close-overlay-btn', function() { closeOverlay('#score-overlay'); });
+    $('#score-overlay').on('click', '.close-overlay-btn', function() { closeStatsAndShowInline(); });
     $('#score-overlay').on('click', '.try-again-btn', function() { resetGame(); });
     $('#score-overlay').on('click', '.show-answer-btn', function() { showAnswer(); });
     $(document).on('click', '.play-again-btn', function() { resetGame(); });
@@ -161,13 +161,7 @@ $(document).ready(function() {
     $(document).on('click', '#help-btn', function() { showStartScreen(); });
     $(document).on('click', '.home-btn', function() { resetGame(); showStartScreen(); });
     $('#score-overlay').on('click', '.close-stats-and-show-inline', function() {
-        closeOverlay('#score-overlay');
-        // Add post-game controls to main page now that modal is closing
-        if ($('#post-game-controls').length === 0) {
-            var controlsTemplate = document.getElementById('template-post-game-controls').content.cloneNode(true);
-            $('#post-game-placeholder').append(controlsTemplate);
-        }
-        $('#answer-stats').fadeIn();
+        closeStatsAndShowInline();
     });
     $('#score-overlay').on('click', '.share-facts-btn', shareFacts);
     $('#score-overlay').on('click', '.share-game-btn', function() { shareGame('#score-overlay'); });
@@ -228,6 +222,19 @@ $(document).ready(function() {
         document.querySelectorAll('.ghost-image').forEach(el => el.remove());
     });
 });
+
+function closeStatsAndShowInline() {
+    closeOverlay('#score-overlay');
+    // Add post-game controls to main page now that a final modal is closing
+    if ($('#post-game-controls').length === 0) {
+        var controlsTemplate = document.getElementById('template-post-game-controls').content.cloneNode(true);
+        $('#post-game-placeholder').append(controlsTemplate);
+    }
+    // Only show answer-stats if we are in the "Show Answer" flow
+    if ($('#remaining-container').text().includes('Actual')) {
+        $('#answer-stats').fadeIn();
+    }
+}
 
 function initializeBoard() {
     var container = $('#plate-container');
