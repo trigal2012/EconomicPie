@@ -371,7 +371,6 @@ function showDidYouKnow() {
     $('.history-bar:not(:last-child)').removeClass('draining');
     requestAnimationFrame(animateHistory);
 }
-let startTime = null;
 
 function updateSlice() {
     updatePlateVisuals();
@@ -696,6 +695,11 @@ function showAnswer(isCorrect = false) {
 
 function resetGame() {
     if (bonusTimer) clearTimeout(bonusTimer);
+
+    // Tactile feedback for reset
+    if (navigator.vibrate) {
+        navigator.vibrate(20);
+    }
 
     // 1. Reset Economic Classes Data
     distributeEvenly();

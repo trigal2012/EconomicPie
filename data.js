@@ -30,30 +30,6 @@ var economicClasses = [{
     "guessedSlices": []
 }];
 
-const INITIAL_PIECES = [
-    {
-        "id": 1,
-        "value": 2.5, "img": "images/slices/slice-12.png"
-    },
-    { "id": 2, "value": 2.5, "img": "images/slices/slice-13.png" },
-    { "id": 3, "value": 2.5, "img": "images/slices/slice-12.png" },
-    { "id": 4, "value": 2.5, "img": "images/slices/slice-13.png" },
-    
-    { "id": 5, "value": 5, "img": "images/slices/slice-1.png" },
-    { "id": 6, "value": 5, "img": "images/slices/slice-1.png" },
-    { "id": 7, "value": 5, "img": "images/slices/slice-1.png" },
-    { "id": 8, "value": 5, "img": "images/slices/slice-1.png" },
-    { "id": 9, "value": 5, "img": "images/slices/slice-1.png" },
-    { "id": 10, "value": 5, "img": "images/slices/slice-1.png" },
-    { "id": 11, "value": 5, "img": "images/slices/slice-1.png" },
-    { "id": 12, "value": 5, "img": "images/slices/slice-1.png" },
-
-    { "id": 13, "value": 10, "img": "images/slices/slice-3.png" },
-    { "id": 14, "value": 10, "img": "images/slices/slice-4.png" },
-    { "id": 15, "value": 10, "img": "images/slices/slice-5.png" },
-    { "id": 16, "value": 10, "img": "images/slices/slice-6.png" },
-    { "id": 17, "value": 10, "img": "images/slices/slice-7.png" }
-];
 
 const BONUS_QUESTION = {
     question: "How much wealth does the top 1% own?",
