@@ -1,6 +1,8 @@
 // Global variable for double-tap timing, shared between click and drag handlers
 var lastTap = 0;
 var bonusTimer = null;
+var bonusResultTimer = null;
+var activeAnimationId = null;
 
 // Distinct colors for each economic class
 const CLASS_COLORS = {
@@ -358,11 +360,18 @@ function displayScoreOverlay(correct, score = 100) {
 }
 
 function checkGuess() {
+    // Defensive Check: Ensure the total wealth is exactly 100
+    const totalGuessed = state.reduce((sum, ec) => sum + ec.guessedValue, 0);
+    if (Math.abs(totalGuessed - 100) > 0.1) {
+        console.error("Wealth Total Mismatch:", totalGuessed);
+        distributeEvenly(); // Force reset if state is corrupted
+        return;
+    }
+
     const sumOfDifferences = state.reduce((sum, ec) => {
         return sum + Math.abs(ec.value - ec.guessedValue);
     }, 0);
 
-    // Use an epsilon for floating point comparison
     if (sumOfDifferences < 0.1) {
         showAnswer(true);
     } else {
@@ -399,7 +408,8 @@ function handleBonusAnswer($btn, option) {
     // Disable all buttons
     $('.options-container button').prop('disabled', true);
     
-    setTimeout(function() {
+    if (bonusResultTimer) clearTimeout(bonusResultTimer);
+    bonusResultTimer = setTimeout(function() {
         var $alert = $('.feedback-alert');
             if (option.correct) {
                 $btn.removeClass('btn-primary').addClass('btn-success');
@@ -462,6 +472,7 @@ function showDidYouKnow() {
     const startYear = WEALTH_HISTORY[0].year;
     const endYear = WEALTH_HISTORY[WEALTH_HISTORY.length - 1].year;
     var duration = 4000;
+    if (activeAnimationId) cancelAnimationFrame(activeAnimationId);
     let animStartTime = null;
     let lastTickYear = startYear;
 
@@ -496,13 +507,13 @@ function showDidYouKnow() {
         });
 
         if (progress < 1) {
-            requestAnimationFrame(animateHistory);
+            activeAnimationId = requestAnimationFrame(animateHistory);
         } else {
             $('.history-bar:not(:last-child)').addClass('draining');
         }
     }
     $('.history-bar:not(:last-child)').removeClass('draining');
-    requestAnimationFrame(animateHistory);
+    activeAnimationId = requestAnimationFrame(animateHistory);
 }
 
 function updateSlice() {
@@ -588,7 +599,6 @@ function showMoveOptions(sourceClass, targetClass) {
         btn.html(icon + label);
         btn.on('click', function() {
             var amount = (opt === 'All') ? sourceValue : opt;
-            AudioManager.play('success');
             executeMove(sourceClass, targetClass, amount);
         });
         $list.append(btn);
@@ -754,6 +764,7 @@ interact('.drag-handle')
 function showAnswer(isCorrect = false) {
     // We manually hide the overlay to ensure a clean slate, but without setting a clear timer
     $('#score-overlay').css({'opacity': '0', 'pointer-events': 'none'});
+    if (activeAnimationId) cancelAnimationFrame(activeAnimationId);
     
     // Hide submit button
     $('#submit-btn').hide();
@@ -806,15 +817,9 @@ function showAnswer(isCorrect = false) {
     function animate(timestamp) {
         if (!startTime) {
             startTime = timestamp;
+            AudioManager.play('reveal');
         }
         const progress = Math.min((timestamp - startTime) / duration, 1);
-
-        // Use the same granular 'tick' sound from the bar chart for consistency
-        if (Math.floor(progress * 60) !== Math.floor(lastTickProgress * 60)) {
-            AudioManager.play('tick');
-            lastTickProgress = progress;
-        }
-
         const easedProgress = easeOutQuad(progress);
 
         if (progress < 1) {
@@ -824,7 +829,7 @@ function showAnswer(isCorrect = false) {
                 economicClasses[index].guessedValue = data.start + (diff * easedProgress);
             });
             updatePlateVisuals(); // Single UI update per frame
-            requestAnimationFrame(animate);
+            activeAnimationId = requestAnimationFrame(animate);
         } else {
             // Ensure final values are exact and update labels one last time
             state.forEach((ec, index) => {
@@ -845,11 +850,15 @@ function showAnswer(isCorrect = false) {
         }
     }
 
-    requestAnimationFrame(animate);
+    activeAnimationId = requestAnimationFrame(animate);
 }
 
 function resetGame() {
     if (bonusTimer) clearTimeout(bonusTimer);
+    if (bonusResultTimer) clearTimeout(bonusResultTimer);
+    if (activeAnimationId) cancelAnimationFrame(activeAnimationId);
+    lastTap = 0;
+
     AudioManager.play('click');
 
     // Tactile feedback for reset
