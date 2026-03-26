@@ -2,6 +2,8 @@
 [![Test Status](https://github.com/trigal2012/EconomicPie/actions/workflows/test.yml/badge.svg)](https://github.com/trigal2012/EconomicPie/actions/workflows/test.yml)
 
 Welcome to the Economic Pie Game! This is an interactive web-based game designed to educate players about wealth distribution in the United States.
+## Test URL
+https://trigal2012.github.io/EconomicPie/
 
 ## Summary
 
