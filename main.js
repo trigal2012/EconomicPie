@@ -1,5 +1,6 @@
 // Global variable for double-tap timing, shared between click and drag handlers
 var lastTap = 0;
+var bonusTimer = null;
 
 // Distinct colors for each economic class
 const CLASS_COLORS = {
@@ -9,6 +10,18 @@ const CLASS_COLORS = {
     "lowermid": "#27ae60",            // Green
     "poorest": "#e74c3c"              // Red
 };
+
+// Reactive State Management: Wrap economicClasses in a Proxy
+// This automatically triggers updatePlateVisuals whenever guessedValue changes
+const state = economicClasses.map(ec => new Proxy(ec, {
+    set(target, key, value) {
+        target[key] = value;
+        if (key === 'guessedValue') {
+            updatePlateVisuals();
+        }
+        return true;
+    }
+}));
 
 // Add Event Listeners
 $(document).ready(function() {
@@ -63,11 +76,6 @@ $(document).ready(function() {
         }
     });
 
-    // Global cleanup for stuck ghosts on interaction end
-    $(document).on('mouseup touchend touchcancel pointercancel', function() {
-        document.querySelectorAll('.ghost-image').forEach(el => el.remove());
-    });
-
     $('#slice-zone').on('click', function(e) {
         if (e.target === this) {
             closeOverlay('#slice-zone');
@@ -119,10 +127,11 @@ function initializeBoard() {
 }
 
 function distributeEvenly() {
-    // Reset state before distributing
+    // Update raw data in a batch to avoid redundant Proxy-triggered renders
     economicClasses.forEach(ec => {
         ec.guessedValue = 20;
     });
+    updatePlateVisuals();
 }
 
 function mainLayerPointerEvents(state){
@@ -133,35 +142,34 @@ function mainLayerPointerEvents(state){
     }
 }
 
-function showOverlay(layerName){
-    if (closeOverlayTimer) clearTimeout(closeOverlayTimer);
-    $(layerName).css({
+function showOverlay(layerName) {
+    const $overlay = $(layerName);
+    // Cancel any pending cleanup transitions
+    $overlay.off('transitionend');
+    $overlay.css({
         'opacity': '1',
         'pointer-events': 'auto'
     });
 }
 
-function clearLayer(layerName){
+function clearLayer(layerName) {
     $(layerName).html('');
 }
 
-function setLayerContents(layerName, html){
-    $(layerName).html(html);
-}
-
-var closeOverlayTimer = null;
-
-// Guess check overlay
 function closeOverlay(layerName) {
-    var overlayLayer = $(layerName);
-    overlayLayer.css({
+    const $overlay = $(layerName);
+    $overlay.css({
         'opacity': '0',
         'pointer-events': 'none'
     });
-    if (closeOverlayTimer) clearTimeout(closeOverlayTimer);
-    closeOverlayTimer = setTimeout(() => {
-        clearLayer(layerName);
-    }, 1500); // Match CSS transition duration
+
+    // Use transitionend for safe cleanup instead of hardcoded timers
+    $overlay.off('transitionend').one('transitionend', function() {
+        // Only clear if the user hasn't tried to open it again during the fade
+        if ($overlay.css('opacity') === '0') {
+            clearLayer(layerName);
+        }
+    });
     mainLayerPointerEvents(true);
 }
 
@@ -227,7 +235,7 @@ function displayScoreOverlay(correct, score = 100) {
 }
 
 function checkGuess() {
-    const sumOfDifferences = economicClasses.reduce((sum, ec) => {
+    const sumOfDifferences = state.reduce((sum, ec) => {
         return sum + Math.abs(ec.value - ec.guessedValue);
     }, 0);
 
@@ -286,7 +294,8 @@ function handleBonusAnswer($btn, option) {
     
 
     // Wait then proceed to Did You Know
-    setTimeout(function() {
+    if (bonusTimer) clearTimeout(bonusTimer);
+    bonusTimer = setTimeout(function() {
         showDidYouKnow();
     }, 3500);
 }
@@ -373,6 +382,7 @@ function updateSlice() {
 
 
 function updatePlateVisuals() {
+    // Iterate over raw data for rendering to avoid Proxy overhead
     economicClasses.forEach((ec, i) => {
         // Update Label
         $('#eClass-label-' + i).html('$' + parseFloat(ec.guessedValue.toFixed(1)) + ' trillion');
@@ -410,7 +420,7 @@ function updatePlateVisuals() {
 }
 
 function showMoveOptions(sourceClass, targetClass) {
-    var sourceValue = economicClasses[sourceClass].guessedValue;
+    var sourceValue = state[sourceClass].guessedValue;
     var options = [];
 
     // Progressive Increment Logic
@@ -458,9 +468,10 @@ function showMoveOptions(sourceClass, targetClass) {
 }
 
 function executeMove(sourceClass, targetClass, amount) {
-    economicClasses[sourceClass].guessedValue -= amount;
-    economicClasses[targetClass].guessedValue += amount;
-    updatePlateVisuals();
+    // Changing the state proxy automatically triggers updatePlateVisuals
+    state[sourceClass].guessedValue = Math.max(0, parseFloat((state[sourceClass].guessedValue - amount).toFixed(1)));
+    state[targetClass].guessedValue = parseFloat((state[targetClass].guessedValue + amount).toFixed(1));
+    
     closeOverlay('#slice-zone');
     $('#submit-btn').prop('disabled', false).addClass('btn-success');
     $('#reset-btn').prop('disabled', false).addClass('btn-secondary');
@@ -471,6 +482,7 @@ function executeMove(sourceClass, targetClass, amount) {
 }
 
 function moveAllWealthTo(targetClass) {
+    // Batch update raw data
     economicClasses.forEach((ec, index) => {
         if (index === targetClass) {
             ec.guessedValue = 100;
@@ -479,6 +491,7 @@ function moveAllWealthTo(targetClass) {
         }
     });
     updatePlateVisuals();
+
     $('#submit-btn').prop('disabled', false).addClass('btn-success');
     $('#reset-btn').prop('disabled', false).addClass('btn-secondary');
     
@@ -549,7 +562,7 @@ interact('.drag-handle')
                     document.querySelectorAll('.ghost-image').forEach(el => el.remove()); // Ensure no other ghosts exist
 
                     var sourceClass = parseInt(target.getAttribute('data-source-class'));
-                    var ec = economicClasses[sourceClass];
+                    var ec = state[sourceClass];
                     var val = ec.guessedValue;
                     
                     // Only create ghost if there is value to move
@@ -596,9 +609,6 @@ interact('.drag-handle')
     })
 
 function showAnswer(isCorrect = false) {
-    // Ensure we don't have a pending clear from a previous close
-    if (closeOverlayTimer) clearTimeout(closeOverlayTimer);
-    
     // We manually hide the overlay to ensure a clean slate, but without setting a clear timer
     $('#score-overlay').css({'opacity': '0', 'pointer-events': 'none'});
     
@@ -613,11 +623,12 @@ function showAnswer(isCorrect = false) {
 
     if (isCorrect) {
         // If correct, skip the animation. Just ensure the final state is rendered.
-        economicClasses.forEach((ec, index) => {
-            ec.guessedValue = ec.value; // Ensure it's the final value
+        state.forEach((ec, index) => {
+            // Use raw object to update without triggering individual Proxy refreshes
+            economicClasses[index].guessedValue = ec.value; 
             $('#eClass-label-' + index).html('$' + ec.value + ' trillion');
         });
-        updatePlateVisuals();
+        updatePlateVisuals(); // Manual refresh once
 
         // Then go straight to the modal after a delay
         setTimeout(() => {
@@ -638,7 +649,7 @@ function showAnswer(isCorrect = false) {
     let startTime = null;
     
     // Store initial and target values
-    const animationData = economicClasses.map(ec => ({
+    const animationData = state.map(ec => ({
         start: ec.guessedValue,
         target: ec.value
     }));
@@ -655,14 +666,15 @@ function showAnswer(isCorrect = false) {
         if (progress < 1) {
             animationData.forEach((data, index) => {
                 const diff = data.target - data.start;
+                // Update raw object to prevent 5x redundant UI updates per frame
                 economicClasses[index].guessedValue = data.start + (diff * easedProgress);
             });
-            updatePlateVisuals();
+            updatePlateVisuals(); // Single UI update per frame
             requestAnimationFrame(animate);
         } else {
             // Ensure final values are exact and update labels one last time
-            economicClasses.forEach((ec, index) => {
-                ec.guessedValue = animationData[index].target;
+            state.forEach((ec, index) => {
+                economicClasses[index].guessedValue = animationData[index].target;
                 $('#eClass-label-' + index).html('$' + ec.value + ' trillion');
             });
             updatePlateVisuals();
@@ -683,6 +695,8 @@ function showAnswer(isCorrect = false) {
 }
 
 function resetGame() {
+    if (bonusTimer) clearTimeout(bonusTimer);
+
     // 1. Reset Economic Classes Data
     distributeEvenly();
 
@@ -757,9 +771,6 @@ function shareFacts() {
 }
 
 function showStartScreen() {
-    // Ensure we don't have a pending clear from a previous close (like from resetGame)
-    if (closeOverlayTimer) clearTimeout(closeOverlayTimer);
-
     var layerName = '#score-overlay';
     var template = document.getElementById('template-start-screen').content.cloneNode(true);
     clearLayer(layerName);
