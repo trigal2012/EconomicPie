@@ -1,4 +1,5 @@
 // Global variable for double-tap timing, shared between click and drag handlers
+var lastTap = 0;
 var bonusTimer = null;
 var bonusResultTimer = null;
 var activeAnimationId = null;
@@ -231,7 +232,7 @@ function closeStatsAndShowInline() {
         $('#post-game-placeholder').append(controlsTemplate);
     }
     // Only show answer-stats if we are in the "Show Answer" flow
-    if ($('#remaining-container').text().includes('Actual')) {
+    if ($('#remaining-container').text().trim().toLowerCase().indexOf('actual') !== -1) {
         $('#answer-stats').fadeIn();
     }
 }

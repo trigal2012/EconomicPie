@@ -68,7 +68,7 @@
 #overlay-layer .overlay-card,
 #score-overlay .overlay-card,
 #slice-zone .overlay-card {
-    margin: auto;
+    margin: 20px auto;
 }
 
 #score-overlay
@@ -123,6 +123,16 @@
 	border-bottom-left-radius: 2rem !important;
 	border-bottom-right-radius: 2rem !important;
 }
+
+/* Increase hit area for close buttons on mobile */
+.close {
+    padding: 1.5rem !important;
+    margin: -1.5rem !important;
+    position: relative;
+    z-index: 10;
+    cursor: pointer;
+}
+
 .droppable
 {
 	aspect-ratio: 1 / 1;
