@@ -1,6 +1,7 @@
 // Global variable for double-tap timing, shared between click and drag handlers
-var lastTap = 0;
 var bonusTimer = null;
+var bonusResultTimer = null;
+var activeAnimationId = null;
 
 // Distinct colors for each economic class
 const CLASS_COLORS = {
@@ -85,19 +86,20 @@ const AudioManager = {
                 noise.start(now);
                 noise.stop(now + 0.2);
                 break;
-            case 'reveal': // "Granular Shimmer" - Short pulse to prevent buildup
+            case 'reveal': // "Organic Swell" - Soft, non-piercing shimmer
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(1200, now);
-                osc.frequency.exponentialRampToValueAtTime(1500, now + 0.03);
-                gain.gain.setValueAtTime(0.02, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 2);
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.1, now + 0.5);
+                gain.gain.linearRampToValueAtTime(0, now + 2);
                 osc.start(now);
-                osc.stop(now + 0.1);
+                osc.stop(now + 2);
                 break;
             case 'tick': // A high-end, tiny "clock" tick for the history years
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(1800, now);
-            gain.gain.setValueAtTime(0.08, now); // Increased volume for better audibility
+                gain.gain.setValueAtTime(0.03, now);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.02);
                 osc.start(now);
                 osc.stop(now + 0.02);
@@ -105,13 +107,14 @@ const AudioManager = {
         }
     },
 
-    playTone(freq, dur, time) {
+    playTone(freq, dur, time, type = 'sine') {
         const osc = this.context.createOscillator();
         const gain = this.context.createGain();
+        osc.type = type;
         osc.connect(gain);
         gain.connect(this.context.destination);
         osc.frequency.setValueAtTime(freq, time);
-        gain.gain.setValueAtTime(0.1, time);
+        gain.gain.setValueAtTime(0.05, time);
         gain.gain.exponentialRampToValueAtTime(0.01, time + dur);
         osc.start(time);
         osc.stop(time + dur);
@@ -142,7 +145,7 @@ const state = economicClasses.map(ec => new Proxy(ec, {
 $(document).ready(function() {
     initializeBoard();
     distributeEvenly();
-    updateSlice();
+    updatePlateVisuals();
     
     // Show Start Screen immediately
     showStartScreen();
@@ -199,21 +202,17 @@ $(document).ready(function() {
         }
     });
 
-    // Custom Double Tap Logic - Restrict to click only to avoid mobile tap-ghosting
-    $(document).on('click', '.drag-handle', function(e) {
+    // Custom Double Tap Logic
+    $(document).on('touchend click', '.drag-handle', function(e) {
         var currentTime = new Date().getTime();
         var tapLength = currentTime - lastTap;
         
-        if (tapLength < 300 && tapLength > 10) {
-            // Only allow "Move All" if the pie is currently in the initial 20/20/20/20/20 distribution
-            const isInitialState = economicClasses.every(ec => ec.guessedValue === 20);
-            
-            if (isInitialState) {
-                e.preventDefault();
-                $('.ghost-image').remove(); // Clear any ghosts from the first tap
-                var targetClass = parseInt($(this).closest('.droppable').attr('eClass'));
-                moveAllWealthTo(targetClass);
-            }
+        if (tapLength < 300 && tapLength > 0) {
+            // Double Tap Detected
+            e.preventDefault(); // Prevent default zoom or other actions
+            $('.ghost-image').remove(); // Clear any ghosts from the first tap
+            var targetClass = parseInt($(this).closest('.droppable').attr('eClass'));
+            moveAllWealthTo(targetClass);
         }
         lastTap = currentTime;
     });
@@ -362,11 +361,18 @@ function displayScoreOverlay(correct, score = 100) {
 }
 
 function checkGuess() {
+    // Defensive Check: Ensure the total wealth is exactly 100
+    const totalGuessed = state.reduce((sum, ec) => sum + ec.guessedValue, 0);
+    if (Math.abs(totalGuessed - 100) > 0.1) {
+        console.error("Wealth Total Mismatch:", totalGuessed);
+        distributeEvenly(); // Force reset if state is corrupted
+        return;
+    }
+
     const sumOfDifferences = state.reduce((sum, ec) => {
         return sum + Math.abs(ec.value - ec.guessedValue);
     }, 0);
 
-    // Use an epsilon for floating point comparison
     if (sumOfDifferences < 0.1) {
         showAnswer(true);
     } else {
@@ -403,7 +409,8 @@ function handleBonusAnswer($btn, option) {
     // Disable all buttons
     $('.options-container button').prop('disabled', true);
     
-    setTimeout(function() {
+    if (bonusResultTimer) clearTimeout(bonusResultTimer);
+    bonusResultTimer = setTimeout(function() {
         var $alert = $('.feedback-alert');
             if (option.correct) {
                 $btn.removeClass('btn-primary').addClass('btn-success');
@@ -466,6 +473,7 @@ function showDidYouKnow() {
     const startYear = WEALTH_HISTORY[0].year;
     const endYear = WEALTH_HISTORY[WEALTH_HISTORY.length - 1].year;
     var duration = 4000;
+    if (activeAnimationId) cancelAnimationFrame(activeAnimationId);
     let animStartTime = null;
     let lastTickYear = startYear;
 
@@ -500,22 +508,14 @@ function showDidYouKnow() {
         });
 
         if (progress < 1) {
-            requestAnimationFrame(animateHistory);
+            activeAnimationId = requestAnimationFrame(animateHistory);
         } else {
             $('.history-bar:not(:last-child)').addClass('draining');
         }
     }
     $('.history-bar:not(:last-child)').removeClass('draining');
-    requestAnimationFrame(animateHistory);
+    activeAnimationId = requestAnimationFrame(animateHistory);
 }
-
-function updateSlice() {
-    updatePlateVisuals();
-}
-
-
-
-
 
 function updatePlateVisuals() {
     // Iterate over raw data for rendering to avoid Proxy overhead
@@ -592,7 +592,6 @@ function showMoveOptions(sourceClass, targetClass) {
         btn.html(icon + label);
         btn.on('click', function() {
             var amount = (opt === 'All') ? sourceValue : opt;
-            AudioManager.play('success');
             executeMove(sourceClass, targetClass, amount);
         });
         $list.append(btn);
@@ -623,27 +622,6 @@ function showFloatingValue(targetIndex, text, className) {
     const $float = $(`<div class="floating-value ${className}">${text}</div>`);
     $target.append($float);
     setTimeout(() => $float.remove(), 1000);
-}
-
-function moveAllWealthTo(targetClass) {
-    AudioManager.play('reveal'); // Use the swell for big moves to feel more impactful
-    // Batch update raw data
-    economicClasses.forEach((ec, index) => {
-        if (index === targetClass) {
-            ec.guessedValue = 100;
-        } else {
-            ec.guessedValue = 0;
-        }
-    });
-    updatePlateVisuals();
-
-    $('#submit-btn').prop('disabled', false).addClass('btn-success');
-    $('#reset-btn').prop('disabled', false).addClass('btn-secondary');
-    
-    // Haptic feedback
-    if (navigator.vibrate) {
-        navigator.vibrate(50);
-    }
 }
 
 interact('.droppable').dropzone({
@@ -758,6 +736,7 @@ interact('.drag-handle')
 function showAnswer(isCorrect = false) {
     // We manually hide the overlay to ensure a clean slate, but without setting a clear timer
     $('#score-overlay').css({'opacity': '0', 'pointer-events': 'none'});
+    if (activeAnimationId) cancelAnimationFrame(activeAnimationId);
     
     // Hide submit button
     $('#submit-btn').hide();
@@ -810,15 +789,9 @@ function showAnswer(isCorrect = false) {
     function animate(timestamp) {
         if (!startTime) {
             startTime = timestamp;
+            AudioManager.play('reveal');
         }
         const progress = Math.min((timestamp - startTime) / duration, 1);
-
-    // Rhythmic 'tick' sound matching the history chart density
-    if (Math.floor(progress * 80) !== Math.floor(lastTickProgress * 80)) {
-            AudioManager.play('tick');
-            lastTickProgress = progress;
-        }
-
         const easedProgress = easeOutQuad(progress);
 
         if (progress < 1) {
@@ -828,7 +801,7 @@ function showAnswer(isCorrect = false) {
                 economicClasses[index].guessedValue = data.start + (diff * easedProgress);
             });
             updatePlateVisuals(); // Single UI update per frame
-            requestAnimationFrame(animate);
+            activeAnimationId = requestAnimationFrame(animate);
         } else {
             // Ensure final values are exact and update labels one last time
             state.forEach((ec, index) => {
@@ -849,11 +822,14 @@ function showAnswer(isCorrect = false) {
         }
     }
 
-    requestAnimationFrame(animate);
+    activeAnimationId = requestAnimationFrame(animate);
 }
 
 function resetGame() {
     if (bonusTimer) clearTimeout(bonusTimer);
+    if (bonusResultTimer) clearTimeout(bonusResultTimer);
+    if (activeAnimationId) cancelAnimationFrame(activeAnimationId);
+
     AudioManager.play('click');
 
     // Tactile feedback for reset
@@ -881,7 +857,7 @@ function resetGame() {
     $('#reset-btn').prop('disabled', true).removeClass('btn-secondary');
     $('#submit-btn').show();
     $('#reset-btn').show();
-    updateSlice();
+    updatePlateVisuals();
 }
 
 function shareGame(layerName) {

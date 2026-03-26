@@ -14,7 +14,6 @@ Players redistribute wealth by dragging from one plate to another, selecting amo
 This application supports the following interactions:
 
 *   **Redistribute Wealth:** Drag from one plate to another to open a transfer menu. Select an amount to move ($2.5T, $5T, $10T, or All).
-*   **Quick Move (Double Tap):** Double-click or double-tap a plate to instantly move all $100 Trillion to that specific class.
 *   **Dynamic Visuals:** Pie charts on the plates grow and shrink in real-time as wealth is moved.
 *   **Scoring System:**
     *   **Correct Guess:** If the distribution matches reality, a "Congrats" screen appears.
