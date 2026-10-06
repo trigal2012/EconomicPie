@@ -1,66 +1,455 @@
 :root {
-    --bg-dark: #0f172a;
-    --card-bg: rgba(255, 255, 255, 0.05);
-    --accent: #10b981;
-    --accent-glow: rgba(16, 185, 129, 0.3);
-    --text-main: #f8fafc;
+    --primary-color: #2c3e50; /* Dark Slate */
+    --accent-color: #f39c12; /* Warm Gold */
+    --success-color: #27ae60; /* Emerald */
+    --bg-color: #f4f6f7;
+    --text-color: #34495e;
+    --card-bg: rgba(255, 255, 255, 0.95);
 }
 
-body {
-    background: var(--bg-dark);
-    color: var(--text-main);
-    font-family: 'Inter', -apple-system, sans-serif;
-    margin: 0;
-    overflow-x: hidden;
-}
-
-/* Glassmorphism Card */
-.plate {
+#body-card
+{
+	border-radius: 1.5rem;
+	height: fit-content;
+	padding: 1rem;
+	width: 100%;
     background: var(--card-bg);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 24px;
-    padding: 20px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+#gameContainer
+{
+	min-height: 100vh;
+	padding: 0;
+	position: relative;
+	height: 100vh;
+	height: 100dvh; /* Use dynamic viewport height for mobile browsers */
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+}
+#game-layer
+{
+	padding-top: .75rem;
+	width: 100%;
+	padding-bottom: 120px; /* Extra padding to ensure bottom text is scrollable */
+}
+.overlay-card
+{
+	border-radius: 2rem;
+	box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+	height: fit-content;
+	width: 90%;
+	max-width: 400px;
+	background-color: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(15px);
+	overflow: hidden;
+}
+#overlay-layer
+, #score-overlay
+, #slice-zone
+{
+	background-color: #0000004f;
+	height: 100vh;
+	position: fixed;
+	width: 100%;
+	z-index: 99999999;
+	display: flex;
+    flex-direction: column;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 1.5s ease;
+    overflow-y: auto; /* Enable scrolling for landscape/small screens */
+    -webkit-overflow-scrolling: touch;
+    padding: 20px 0;
+}
+
+/* Default centering for overlays using margin */
+#overlay-layer .overlay-card,
+#score-overlay .overlay-card,
+#slice-zone .overlay-card {
+    margin: 20px auto;
+}
+
+#score-overlay
+{
+    /* No specific alignment needed here, handled by child margin */
+}
+
+#slice-zone
+{
+}
+
+
+
+.block-flex
+{
+	display: flex;
+	padding-bottom: 1rem;
+}
+.btn
+{
+	background-color: var(--primary-color);
+	border: none;
+	border-radius: 50px; /* Pill shape */
+	color: #fff;
+	cursor: pointer;
+	font-size: 18px;
+	font-weight: 600;
+	padding: 12px 25px;
+	transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.btn:hover
+{
+	background-color: #34495e;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+.btn-primary { background-color: var(--primary-color); }
+.btn-success { background-color: var(--success-color) !important; }
+.btn-info { background-color: #3498db; }
+.btn-secondary { background-color: #95a5a6; color: #2c3e50; }
+
+.card-header
+{
+	border-top-left-radius: 2rem !important;
+	border-top-right-radius: 2rem !important;
+}
+.card-footer
+{
+	border-bottom-left-radius: 2rem !important;
+	border-bottom-right-radius: 2rem !important;
+}
+
+/* Increase hit area for close buttons on mobile */
+.close {
+    padding: 1.5rem !important;
+    margin: -1.5rem !important;
+    position: relative;
+    z-index: 10;
+    cursor: pointer;
+}
+
+.droppable
+{
+	aspect-ratio: 1 / 1;
+	width: 100%;
+	background-image: url('images/plate.png');
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border: none;
+	background-color: transparent;
+	padding: 0;
+	margin-top: auto;
+	cursor: default;
+    -webkit-tap-highlight-color: transparent;
+}
+.droppable:focus,
+.droppable:active,
+.droppable:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+.droppable img
+{
+	height: 60%;
+	width: 60%;
+	background-color: transparent;
+	pointer-events: none;
+	border-radius: 50%;
+	mix-blend-mode: multiply;
+	object-fit: contain;
+}
+.drag-handle {
+	position: absolute;
+	width: 60%;
+	height: 60%;
+	border-radius: 50%;
+	cursor: grab;
+	touch-action: none;
+	outline: none;
+}
+.ghost-image {
+	position: absolute;
+	width: 80px !important;
+	height: 80px !important;
+	opacity: 0.75;
+	z-index: 10000;
+	pointer-events: none; /* The ghost should not intercept drop events */
+	border-radius: 50%;
+	mix-blend-mode: multiply;
+	object-fit: contain;
+}
+.droppable .pie-chart-img {
+	pointer-events: none; /* The underlying image should not interfere */
+	outline: none;
+}
+ @media (min-width: 1024px) {
+.droppable
+{
+    aspect-ratio: 1 / 1;
+	height: 20vh;
+	width: 20vh;
+	margin-left: auto;
+	margin-right: auto;
+}
+}
+.slice-placeholder-div
+{
+	display: flex;
+	height: auto;
+	overflow: visible;
+}
+.stacks-row {
+}
+body
+{
+	background: radial-gradient(circle at top left, #eef2f3, #dfe6e9);
+    color: var(--text-color);
+    font-family: 'Poppins', sans-serif;
+	font-size: 18px;
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	user-select: none;
+	-webkit-user-select: none;
+}
+h1
+{
+	font-size: 36px;
+    font-weight: 700;
+	margin-top: 0;
+}
+html,
+body
+img
+{
+	height: inherit;
+	width: inherit;
+}
+p
+{
+	font-size: 18px;
+}
+.label-text {
+    font-weight: 700;
+	width: min-content;
+	margin-left: auto;
+	margin-right: auto;
+}
+#help-btn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    padding: 8px 15px;
+}
+@media (max-width: 1024px) {
+	h1 {
+		font-size: 1.75rem;
+	}
+	p {
+		font-size: 1rem;
+	}
+	.small-text {
+		font-size: 1.1rem;
+		line-height: 1.2;
+	}
+	#body-card {
+		border-radius: 0;
+		padding: 0.5rem;
+		box-shadow: none;
+		background: transparent;
+	}
+    .btn {
+        font-size: 16px;
+    }
+    
+    /* Mobile Drawer Style for Move Menu */
+    #slice-zone .overlay-card {
+        /* Remove fixed positioning to prevent cutoff and allow scrolling */
+        position: relative;
+        bottom: auto;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 25px 25px 0 0;
+        margin: 0;
+        margin-top: auto; /* Ensure it sticks to bottom in drawer mode */
+        padding-bottom: 20px;
+    }
+}
+.move-options-list .list-group-item {
+    padding: 1rem;
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+#submit-btn:disabled, #reset-btn:disabled {
+    background-color: #bdc3c7; /* Lighter gray for disabled */
+    border-color: #6c757d;
+    opacity: 0.65; /* Keep the standard disabled opacity */
+    box-shadow: none;
+    transform: none;
+}
+
+.scrollable-body {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Landscape optimizations for mobile to save vertical space */
+@media (max-height: 600px) and (orientation: landscape) {
+    /* Game Board: Single horizontal row */
+    .game-board {
+        display: flex;
+        flex-wrap: nowrap; /* Force single line */
+        justify-content: space-around;
+        align-items: flex-end;
+        width: 100%;
+        height: 100%;
+        gap: 0;
+    }
+
+    .plate-slot {
+        flex: 0 0 19%;
+        width: 19%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .droppable {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1/1;
+    }
+
+    /* Center overlays in landscape for better visibility */
+    #score-overlay .overlay-card,
+    #slice-zone .overlay-card {
+        margin: auto;
+        border-radius: 1.5rem;
+        width: 95%;
+        max-width: 700px; /* Allow wider modal in landscape */
+        padding-bottom: 0;
+    }
+
+    /* Reduce scrollable area height so header/footer fit on screen in landscape */
+    .scrollable-body {
+        max-height: 40vh;
+    }
+
+    /* Help Button as FAB in lower right */
+    #help-btn {
+        top: auto;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        padding: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+}
+
+.history-chart {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    border-bottom: none;
+    border-left: 2px solid #ccc;
+}
+.bar-container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.bar-wrapper {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+.history-bar {
+    height: 20px;
+    width: 0;
+    transition: width 0.1s linear;
+    border-radius: 0 5px 5px 0;
+    position: relative; /* For pseudo-element */
+    overflow: hidden; /* Clip the gradient */
+}
+.history-bar.draining{
+        width: 1% !important;
+        height: 20px;
+     transition: width 4s ease-in;
+}
+.bar-label {
+    margin-top: 0;
+    margin-right: 10px;
+    font-size: 0.7rem;
+    text-align: center;
+    width: 90px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.action-buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* Default Game Board Styles (Mobile Portrait & Desktop Base) */
+.game-board {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    gap: 10px;
+}
+
+.plate-slot {
+    width: 30%; /* 3 per row roughly */
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 10px;
 }
 
-.plate:active { transform: scale(0.95); }
-
-/* The Liquid Pie Visual */
-.pie-visual {
-    width: 90px; height: 90px;
-    border-radius: 50%;
-    margin-bottom: 12px;
-    background: conic-gradient(var(--accent) calc(var(--percent) * 1%), transparent 0);
-    filter: drop-shadow(0 0 8px var(--accent-glow));
-    border: 4px solid rgba(255,255,255,0.05);
-    transition: 0.5s stroke-dasharray ease;
+@media (min-width: 1024px) {
+    .plate-slot {
+        width: 18%; /* 5 in a row on desktop */
+    }
 }
 
-/* Floating Action Pills */
-.slice-pill {
-    background: var(--accent);
-    color: var(--bg-dark);
-    padding: 18px 30px;
-    border-radius: 18px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
-    cursor: grab;
-    transition: 0.2s;
+/* Floating Feedback Animation */
+.floating-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 1000;
+    animation: floatUp 1s ease-out forwards;
 }
+.val-pos { color: var(--success-color); }
+.val-neg { color: #e74c3c; }
 
-.slice-pill:hover { transform: translateY(-3px); }
-
-/* Progress Bar at Top */
-.progress-container {
-    width: 100%; height: 6px; background: rgba(255,255,255,0.1);
-    position: fixed; top: 0; left: 0;
-}
-.progress-fill {
-    height: 100%; background: var(--accent); width: 0%;
-    transition: width 0.4s ease;
+@keyframes floatUp {
+    0% { opacity: 1; transform: translate(-50%, -50%); }
+    100% { opacity: 0; transform: translate(-50%, -120px); }
 }
