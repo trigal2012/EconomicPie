@@ -58,7 +58,9 @@ That's it! The game should now be running in your browser.
 
 You can play the live version of the game here:
 
-**[Link to live game]** - (https://economicpie.online)
+**[https://economicpie.org](https://economicpie.org)**
+
+The old address, economicpie.online, still works and redirects to economicpie.org.
 
 ## Project Details
 
@@ -104,9 +106,6 @@ This is an open-source project. You are free to use, modify, and distribute it a
 
 ## Contact & Support
 
-*   **Project Maintainer:** [Organization Name]
-*   **Contact Email:** [your-email@example.com]
-
 If you have any questions or encounter any issues, please open an issue on the GitHub repository.
 
 ## Test Plan (Manual QA)
@@ -140,10 +139,58 @@ Use this checklist to verify functionality before releasing updates. Copy this i
 
 This section contains information useful for future maintainers or if the original developer is unavailable.
 
-//TBD
-*   **Hosting Provider:** [e.g., Netlify, Vercel, GitHub Pages, AWS S3] 
-*   **Domain Registrar:** [Namecheap]
-*   **DNS Management:** [Namecheap]
-*   **Deployment Method:** [Manual upload]
-*   **Analytics/Monitoring:** [TBD]
-*   **Critical Accounts:** [WIX, Namecheap]
+### At a Glance
+
+| | |
+|---|---|
+| **Public website** | [https://economicpie.org](https://economicpie.org) |
+| **Legacy domain** | economicpie.online (redirects to economicpie.org) |
+| **Hosting provider** | Namecheap Web Hosting (cPanel) |
+| **Domain registrar** | Namecheap |
+| **DNS management** | Namecheap |
+| **Website files** | `/public_html/` on the cPanel server |
+| **Deployment method** | Manual upload to `/public_html/` |
+| **Analytics/Monitoring** | TBD |
+| **Critical accounts** | Namecheap, WIX |
+
+### Domains
+
+#### economicpie.org (active domain)
+
+*   **Role:** The primary public identity of the organization.
+*   **Points to:** Namecheap Web Hosting DNS.
+*   **Security:** Secured with an active SSL certificate, so browsers show `https://` and a padlock icon.
+
+#### economicpie.online (legacy forwarding domain)
+
+*   **Role:** An administrative forwarding address, kept so visitors who type the old address still find the site.
+*   **Function:** All traffic to economicpie.online is redirected to [https://economicpie.org/](https://economicpie.org/). No website content is served directly from economicpie.online.
+
+### Web Hosting & File Management
+
+*   **Hosting account label:** The hosting account is listed as economicpie.online in the Namecheap dashboard. This is only an internal billing/account ID and does not affect visitors.
+*   **File storage:** All live website files (`index.html`, styles, images, and scripts) are stored directly in the server's main web folder:
+
+    ```text
+    /public_html/
+    ```
+
+### How Traffic Flows
+
+```text
+Visitor types: economicpie.online
+       │
+       ▼
+cPanel server (/public_html/.htaccess)
+       │
+       ▼  Automatic 301 (permanent) redirect
+       │
+Visitor lands on: https://economicpie.org
+```
+
+### Key Maintenance Notes
+
+*   **Single source of truth:** All updates to the live website are made inside `/public_html/`.
+*   **Automatic HTTPS:** Plain `http://` requests are automatically upgraded to secure `https://`.
+*   **Search engine indexing:** Google and other search engines recognize economicpie.org as the only primary site.
+*   **Don't delete `.htaccess`:** The redirect from economicpie.online to economicpie.org and the HTTPS upgrade are configured in `/public_html/.htaccess`. Keep this file when uploading or replacing website files.
