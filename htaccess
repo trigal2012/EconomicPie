@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# 1. Redirect economicpie.online to economicpie.org
+RewriteCond %{HTTP_HOST} ^(www\.)?economicpie\.online$ [NC]
+RewriteRule ^(.*)$ https://economicpie.org/$1 [R=301,L]
+
+# 2. Force HTTPS for economicpie.org
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
